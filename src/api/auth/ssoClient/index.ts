@@ -5,7 +5,7 @@
 import request from '@/utils/request.ts'
 import { AxiosPromise } from 'axios'
 import { SsoClientResponseData, SsoClientQuery, SsoClientRecord, SsoClientForm } from './type.ts'
-import { ResponseData, SelectResponseData } from '@/types/types.ts'
+import { ResponseData } from '@/types/types.ts'
 
 enum API {
   SSO_CLIENT_RESTFUL_URL = '/auth/v1/ssoClient',
@@ -14,13 +14,13 @@ enum API {
 /**
  * 列表
  *
- * @param params
+ * @param data
  */
-export function page(params: SsoClientQuery): AxiosPromise<SsoClientResponseData> {
+export function page(data: SsoClientQuery): AxiosPromise<SsoClientResponseData> {
   return request({
-    url: API.SSO_CLIENT_RESTFUL_URL,
-    method: 'get',
-    params: params,
+    url: `${API.SSO_CLIENT_RESTFUL_URL}/page`,
+    method: 'post',
+    data,
   })
 }
 

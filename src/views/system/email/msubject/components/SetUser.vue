@@ -17,7 +17,6 @@ import JSONBigInt from 'json-bigint'
 import { ElMessage } from 'element-plus'
 import BTable from '@/components/Table/BTable/index.vue'
 import SearchContainerBox from '@/components/SearchContainerBox/index.vue'
-import useWidth from '@/hooks/dialogWidth'
 import { useMessage } from '@/hooks/message'
 
 defineOptions({
@@ -131,7 +130,7 @@ const getInfo = async (id: number, column: string) => {
     checkedRows = response.data[column]
     refresh.value = Math.random()
   } catch (err: any) {
-    useMessage().error(err.message)
+    useMessage().error(`${t('common.fail')}` + err.message)
   }
 }
 
@@ -185,13 +184,7 @@ defineExpose({
 </script>
 
 <template>
-  <el-dialog
-    v-model="visible"
-    :width="useWidth()"
-    :title="t('common.add')"
-    :close-on-click-modal="false"
-    :close-on-press-escape="false"
-  >
+  <el-dialog v-model="visible" :title="t('common.add')" :close-on-click-modal="false" :close-on-press-escape="false">
     <search-container-box>
       <el-form ref="userQueryFormRef" :model="queryParams" :inline="true">
         <!-- 用户名 -->

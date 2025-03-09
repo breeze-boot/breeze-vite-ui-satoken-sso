@@ -130,7 +130,7 @@ const useUserStore = defineStore('User', {
      */
     getRoleCodes: (state: UserState) => {
       return async (): Promise<string[]> => {
-        return state.roleCodes.length > 0 ? state.roleCodes : GET_STR_ARRAY_STORAGE(StorageName.RoleCodes)
+        return (state.roleCodes.length > 0 ? state.roleCodes : GET_STR_ARRAY_STORAGE(StorageName.RoleCodes)) as string[]
       }
     },
   },

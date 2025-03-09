@@ -11,7 +11,7 @@ import { SelectData } from '@/types/types.ts'
 import SendMsg from '@/views/system/messages/msg/components/SendMsg.vue'
 import useMsgStore from '@/store/modules/msg.ts'
 import useUserStore from '@/store/modules/user.ts'
-import useWidth from '@/hooks/dialogWidth'
+import { useMessage } from '@/hooks/message'
 
 defineOptions({
   name: 'SendMsgMethod',
@@ -67,7 +67,7 @@ const handleSendMsgMethodFormSubmit = async () => {
     if (sendMsgMethodDataForm.value.method === 'ALL') {
       // 发送给全部请求
       msgStore.stompClient?.publish({
-        destination: '/message/asyncSendBroadcastMsg',
+        destination: '/send/asyncSendBroadcastMsg',
         headers: {
           Authorization: userStore.accessToken,
           username: userStore.userInfo.username,
@@ -78,7 +78,7 @@ const handleSendMsgMethodFormSubmit = async () => {
     }
     sendMsgRef.value.init(sendMsgMethodDataForm.value.method, currentMsgId.value)
   } catch (err: any) {
-    useMessage().error(err.message)
+    useMessage().error(`${t('common.fail')}` + err.message)
   }
 }
 
@@ -90,10 +90,10 @@ defineExpose({
 <template>
   <el-dialog
     v-model="visible"
-    :width="useWidth()"
     :title="t('msg.common.sendMsgMethod')"
     :close-on-click-modal="false"
     :close-on-press-escape="false"
+    width="30%"
   >
     <el-form
       :model="sendMsgMethodDataForm"

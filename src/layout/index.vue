@@ -28,42 +28,20 @@ const layoutDict: LayoutDict = {
 const WIDTH: number = 992
 watchEffect(() => {
   if (width.value > WIDTH) {
-    settingStore.setDevice(DEVICE.PC, 50 + '%', 80 + '%')
+    settingStore.setDevice(DEVICE.PC)
   } else if (width.value >= WIDTH / 2 && width.value < WIDTH) {
-    settingStore.setDevice(DEVICE.PAD, 90 + '%', 100 + '%')
+    settingStore.setDevice(DEVICE.PAD)
   } else {
-    settingStore.setDevice(DEVICE.MOBILE, 100 + '%', 100 + '%')
+    settingStore.setDevice(DEVICE.MOBILE)
   }
 })
 </script>
 
 <template>
-  <transition name="slide-fade">
-    <component :is="layoutDict[theme.menuLayout]" />
-  </transition>
+  <component :is="layoutDict[theme.menuLayout]" />
 
   <!-- 全局组件 -->
   <context-menu ref="contextMenuRef" />
-  <!-- 全局组件 -->
+  <!-- 全局组件 websocket -->
   <websocket />
 </template>
-
-<style lang="scss" scoped>
-/*
-    进入和离开动画可以使用不同
-    持续时间和速度曲线。
-  */
-.slide-fade-enter-active {
-  transition: opacity 0.1s ease-in;
-}
-
-.slide-fade-leave-active {
-  transition: all 0.1s ease-out;
-}
-
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateX(20px);
-  opacity: 0;
-}
-</style>

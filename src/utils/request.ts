@@ -16,8 +16,8 @@ let userStore: any = undefined
  */
 const request: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_APP_BASE_API,
-  timeout: 50000,
   withCredentials: true,
+  timeout: 50000,
 })
 
 /**
@@ -42,10 +42,10 @@ request.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     userStore = useUserStore(pinia)
   }
   // 如果存在token，请求携带token
-  const accessToken: string = userStore.accessToken
-  if (accessToken && !config.headers[StorageName.Authorization]) {
-    config.headers[StorageName.Authorization] = `Bearer ${accessToken}`
-  }
+  // const accessToken: string = userStore.accessToken
+  // if (accessToken && !config.headers[StorageName.Authorization]) {
+  //   config.headers[StorageName.Authorization] = `Bearer ${accessToken}`
+  // }
   config.headers[CookiesKey.XTenantId] = userStore.tenantId
   config.headers[StorageName.AcceptLanguage] = i18n.global.locale.value
   return config

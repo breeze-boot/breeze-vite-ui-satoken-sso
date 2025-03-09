@@ -11,7 +11,6 @@ import { RoleForm } from '@/api/auth/role/type.ts'
 import { useI18n } from 'vue-i18n'
 import JSONBigInt from 'json-bigint'
 import { SelectData } from '@/types/types.ts'
-import useWidth from '@/hooks/dialogWidth'
 import { useMessage } from '@/hooks/message'
 import { selectCustomizePermission, selectRowPermissionType } from '@/api/auth/permission/rowPermission'
 
@@ -101,8 +100,8 @@ const getInfo = async (id: number) => {
   try {
     const response: any = await getRole(JSONBigInt.parse(id))
     Object.assign(roleDataForm.value, response.data)
-  } catch (e: any) {
-    console.error(e.message)
+  } catch (err: any) {
+    console.error(err.message)
   }
 }
 
@@ -113,8 +112,8 @@ const initSelectRowPermissionType = async () => {
   try {
     const response: any = await selectRowPermissionType()
     permissionOption.value = response.data
-  } catch (e: any) {
-    console.error(e.message)
+  } catch (err: any) {
+    console.error(err.message)
   }
 }
 
@@ -125,8 +124,8 @@ const initSelectCustomizePermission = async () => {
   try {
     const response: any = await selectCustomizePermission()
     customizeRowPermissionOption.value = response.data
-  } catch (e: any) {
-    console.error(e.message)
+  } catch (err: any) {
+    console.error(err.message)
   }
 }
 
@@ -142,7 +141,7 @@ const handleRoleDataFormSubmit = async () => {
     useMessage().success(`${(id ? t('common.modify') : t('common.save')) + t('common.success')}`)
     $emit('reloadDataList')
   } catch (err: any) {
-    useMessage().error(err.message)
+    useMessage().error(`${t('common.fail')}` + err.message)
   } finally {
     visible.value = false
     loading.value = false
@@ -157,7 +156,6 @@ defineExpose({
 <template>
   <el-dialog
     v-model="visible"
-    :width="useWidth()"
     :title="!roleDataForm.id ? t('common.add') : t('common.edit')"
     :close-on-click-modal="false"
     :close-on-press-escape="false"

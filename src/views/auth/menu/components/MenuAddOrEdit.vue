@@ -15,7 +15,6 @@ import { DIALOG_FLAG, ROOT } from '@/utils/common.ts'
 import SvgIconSelect from '@/components/SvgIconSelect/index.vue'
 import JSONBigInt from 'json-bigint'
 import { selectPlatform } from '@/api/auth/platform'
-import useWidth from '@/hooks/dialogWidth'
 import { useMessage } from '@/hooks/message'
 
 defineOptions({
@@ -126,8 +125,8 @@ const initSelectMenu = async (id: number | undefined) => {
         children: response.data,
       },
     ]
-  } catch (e: any) {
-    console.error(e.message)
+  } catch (err: any) {
+    console.error(err.message)
   }
 }
 
@@ -138,8 +137,8 @@ const initSelectPlatform = async () => {
   try {
     const response: any = await selectPlatform()
     platformOptions.value = response.data
-  } catch (e: any) {
-    console.error(e.message)
+  } catch (err: any) {
+    console.error(err.message)
   }
 }
 
@@ -152,8 +151,8 @@ const getInfo = async (id: number) => {
   try {
     const response: any = await getMenu(JSONBigInt.parse(id))
     Object.assign(menuDataForm.value, response.data)
-  } catch (e: any) {
-    console.error(e.message)
+  } catch (err: any) {
+    console.error(err.message)
   }
 }
 
@@ -169,7 +168,7 @@ const handleMenuDataFormSubmit = async () => {
     useMessage().success(`${(id ? t('common.modify') : t('common.save')) + t('common.success')}`)
     $emit('reloadDataList')
   } catch (err: any) {
-    useMessage().error(err.message)
+    useMessage().error(`${t('common.fail')}` + err.message)
   } finally {
     visible.value = false
     loading.value = false
@@ -184,7 +183,6 @@ defineExpose({
 <template>
   <el-dialog
     v-model="visible"
-    :width="useWidth()"
     :title="!menuDataForm.id ? t('common.add') : t('common.edit')"
     :close-on-click-modal="false"
     :close-on-press-escape="false"

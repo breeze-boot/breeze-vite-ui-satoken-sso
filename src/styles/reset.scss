@@ -221,3 +221,9 @@ body * {
         -webkit-border-radius: 4px;
     }
 }
+
+.el-table thead  .cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

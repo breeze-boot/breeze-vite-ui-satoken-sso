@@ -10,6 +10,7 @@ import type { ColumnCacheData } from '@/types/types'
 import { GET_OBJ_ARRAY_STORAGE, SET_OBJ_ARRAY_STORAGE } from '@/utils/storage.ts'
 import { StorageName } from '@/types/types'
 import { useMessage } from '@/hooks/message'
+import { useI18n } from 'vue-i18n'
 
 const useColumnStore = defineStore('Column', {
   state: (): ColumnState => {
@@ -24,7 +25,8 @@ const useColumnStore = defineStore('Column', {
         this.columns = response.data as ColumnCacheData[]
         SET_OBJ_ARRAY_STORAGE(StorageName.Columns, this.columns)
       } catch (err: any) {
-        useMessage().error(err.message)
+        const { t } = useI18n()
+        useMessage().error(`${t('common.fail')}` + err.message)
       }
     },
     async setColumnByMenu(data: ColumnCacheData) {
@@ -32,7 +34,8 @@ const useColumnStore = defineStore('Column', {
         await saveMenuColumn(data)
         await this.getRolesMenuColumns()
       } catch (err: any) {
-        useMessage().error(err.message)
+        const { t } = useI18n()
+        useMessage().error(`${t('common.fail')}` + err.message)
       }
     },
     async getColumnByMenu(menu: string) {

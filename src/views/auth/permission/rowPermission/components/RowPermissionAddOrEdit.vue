@@ -14,7 +14,6 @@ import { selectDept } from '@/api/auth/dept'
 import { listDeptUser } from '@/api/auth/user'
 import { UserRecord } from '@/api/auth/user/type.ts'
 import { Option, SelectData } from '@/types/types.ts'
-import useWidth from '@/hooks/dialogWidth'
 import { useMessage } from '@/hooks/message'
 
 defineOptions({
@@ -110,8 +109,8 @@ const getInfo = async (id: number) => {
         userList.value?.some((user: Option) => user.key === per),
       )
     }
-  } catch (e: any) {
-    console.error(e.message)
+  } catch (err: any) {
+    console.error(err.message)
   }
 }
 
@@ -127,7 +126,7 @@ const handlePermissionDataFormSubmit = async () => {
     useMessage().success(`${(id ? t('common.modify') : t('common.save')) + t('common.success')}`)
     $emit('reloadDataList')
   } catch (err: any) {
-    useMessage().error(err.message)
+    useMessage().error(`${t('common.fail')}` + err.message)
   } finally {
     visible.value = false
     loading.value = false
@@ -138,8 +137,8 @@ const initDeptSelectData = async () => {
   try {
     const response: any = await selectDept()
     deptOption.value = response.data
-  } catch (e: any) {
-    console.error(e.message)
+  } catch (err: any) {
+    console.error(err.message)
   }
 }
 
@@ -155,8 +154,8 @@ const initUserTransferData = async () => {
       })
     })
     userList.value = data
-  } catch (e: any) {
-    console.error(e.message)
+  } catch (err: any) {
+    console.error(err.message)
   }
 }
 
@@ -172,7 +171,7 @@ defineExpose({
 <template>
   <el-dialog
     v-model="visible"
-    :width="useWidth()"
+    width="40%"
     :title="!rowPermissionDataForm.id ? t('common.add') : t('common.edit')"
     :close-on-click-modal="false"
     :close-on-press-escape="true"

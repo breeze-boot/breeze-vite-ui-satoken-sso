@@ -10,7 +10,6 @@ import { addTenant, getTenant, editTenant, checkTenantCode } from '@/api/auth/te
 import { TenantForm } from '@/api/auth/tenant/type.ts'
 import { useI18n } from 'vue-i18n'
 import JSONBigInt from 'json-bigint'
-import useWidth from '@/hooks/dialogWidth'
 import { useMessage } from '@/hooks/message'
 
 defineOptions({
@@ -83,7 +82,7 @@ const getInfo = async (id: number) => {
     const response: any = await getTenant(JSONBigInt.parse(id))
     Object.assign(tenantDataForm.value, response.data)
   } catch (err: any) {
-    useMessage().error(err.message)
+    useMessage().error(`${t('common.fail')}` + err.message)
   }
 }
 
@@ -99,7 +98,7 @@ const handleTenantDataFormSubmit = async () => {
     useMessage().success(`${(id ? t('common.modify') : t('common.save')) + t('common.success')}`)
     $emit('reloadDataList')
   } catch (err: any) {
-    useMessage().error(err.message)
+    useMessage().error(`${t('common.fail')}` + err.message)
   } finally {
     visible.value = false
     loading.value = false
@@ -114,7 +113,6 @@ defineExpose({
 <template>
   <el-dialog
     v-model="visible"
-    :width="useWidth()"
     :title="!tenantDataForm.id ? t('common.add') : t('common.edit')"
     :close-on-click-modal="false"
     :close-on-press-escape="false"

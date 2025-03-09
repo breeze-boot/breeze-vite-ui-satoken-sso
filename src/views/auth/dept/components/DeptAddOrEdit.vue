@@ -12,7 +12,6 @@ import { useI18n } from 'vue-i18n'
 import type { SelectData } from '@/types/types.ts'
 import { DIALOG_FLAG, ROOT } from '@/utils/common.ts'
 import JSONBigInt from 'json-bigint'
-import useWidth from '@/hooks/dialogWidth'
 import { useMessage } from '@/hooks/message'
 
 defineOptions({
@@ -113,8 +112,8 @@ const initSelectDept = async (id?: number) => {
         children: response.data,
       },
     ]
-  } catch (e: any) {
-    console.error(e.message)
+  } catch (err: any) {
+    console.error(err.message)
   }
 }
 
@@ -127,8 +126,8 @@ const getInfo = async (id: number) => {
   try {
     const response: any = await getDept(JSONBigInt.parse(id))
     Object.assign(deptDataForm.value, response.data)
-  } catch (e: any) {
-    console.error(e.message)
+  } catch (err: any) {
+    console.error(err.message)
   }
 }
 
@@ -144,7 +143,7 @@ const handleDeptDataFormSubmit = async () => {
     useMessage().success(`${(id ? t('common.modify') : t('common.save')) + t('common.success')}`)
     $emit('reloadDataList')
   } catch (err: any) {
-    useMessage().error(err.message)
+    useMessage().error(`${t('common.fail')}` + err.message)
   } finally {
     visible.value = false
     loading.value = false
@@ -159,7 +158,6 @@ defineExpose({
 <template>
   <el-dialog
     v-model="visible"
-    :width="useWidth()"
     :title="!deptDataForm.id ? t('common.add') : t('common.edit')"
     :close-on-click-modal="false"
     :close-on-press-escape="false"

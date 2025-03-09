@@ -13,6 +13,7 @@ import { LAYOUT } from '@/utils/common.ts'
  * 分页查询参数
  */
 export interface PageQuery {
+  condition?: object
   current?: number
   size?: number
   total?: number
@@ -220,8 +221,8 @@ export interface Theme {
   watermark: boolean
   watermarkContent: string[]
   themeModel: string
-  lightFont: object
-  darkFont: object
+  lightFont: any
+  darkFont: any
   themeColor: string
   size: string
 }

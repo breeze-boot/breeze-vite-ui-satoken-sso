@@ -4,7 +4,7 @@
  */
 import request from '@/utils/request.ts'
 import { AxiosPromise } from 'axios'
-import { LogResponseData, LogQuery } from './type.ts'
+import { SysLogResponseData, SysLogQuery } from './type.ts'
 import { ResponseData } from '@/types/types.ts'
 
 enum API {
@@ -14,13 +14,13 @@ enum API {
 /**
  * 列表
  *
- * @param params
+ * @param data
  */
-export function page(params: LogQuery): AxiosPromise<LogResponseData> {
+export function page(data: SysLogQuery): AxiosPromise<SysLogResponseData> {
   return request({
-    url: API.SYS_LOG_RESTFUL_URL,
-    method: 'get',
-    params: params,
+    url: `${API.SYS_LOG_RESTFUL_URL}/page`,
+    method: 'post',
+    data,
   })
 }
 

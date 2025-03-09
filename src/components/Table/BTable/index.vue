@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { ElMessage, ElMessageBox, ClickOutside as vClickOutside } from 'element-plus'
+import { watch, unref, onUpdated, onMounted, reactive, ref, computed, nextTick } from 'vue'
+import { ElMessage, ElMessageBox, ClickOutside as vClickOutside, ElTable, ElForm } from 'element-plus'
 import { Btn, ColumnSort, Field, HandleBtn as handleType, QueryParams } from '@/components/Table/types/types.ts'
-import { watch, unref } from 'vue'
-import { onUpdated, onMounted, reactive, ref, computed, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { useDict } from '@/hooks/dict'
-import { camelCaseToUnderscore, SORT } from '@/utils/common.ts'
+import { camelCaseToUnderscore } from '@/utils/common.ts'
 import TableItem from '../TableItem/TableItem.vue'
 import { VueDraggable } from 'vue-draggable-plus'
 import useColumnStore from '@/store/modules/column'
@@ -15,143 +14,215 @@ import { ColumnCacheData } from '@/types/types.ts'
 import SvgButton from '@/components/SvgButton/index.vue'
 import useSettingStore from '@/store/modules/setting.ts'
 import { useMessage } from '@/hooks/message'
+import SvgIcon from '@/components/SvgIcon/index.vue'
+import QueryBuilder from '@/components/QueryBuilder/index.vue'
 
 defineOptions({
   name: 'BTable',
   inheritAttrs: false,
 })
 
+/**
+ * 使用 defineProps 定义组件的 props，并指定其类型为 TableProps 接口所定义的类型
+ */
 const props = defineProps({
-  // 表格顶部按钮
   tbHeaderBtn: {
-    type: Array,
+    type: Array as () => any[],
     default: () => [],
+    /**
+     * 默认值为一个空数组，表示初始时表格顶部没有按钮
+     */
   },
-  // 表格宽度，默认100%
   tableWidth: {
     type: String,
     default: '100%',
+    /**
+     * 默认值为 '100%'，表示表格宽度占父容器的 100%
+     */
   },
-  // 表格高度，默认60%
   tableHeight: {
     type: String,
     default: '60%',
+    /**
+     * 默认值为 '60%'，表示表格高度占父容器的 60%
+     */
   },
-  // 是否展示合并行
   showSummary: {
     type: Boolean,
     default: false,
+    /**
+     * 默认值为 false，表示默认不展示表格的合并行（合计行）
+     */
   },
-  // 合计行方法
   summaryMethod: {
     type: Function,
     default: () => {},
+    /**
+     * 默认值为一个空函数，表示如果未提供具体的合计行计算方法，则不进行任何计算
+     */
   },
-  // 合并行或者列方法
   spanMethod: {
     type: Function,
+    default: undefined,
+    /**
+     * 默认值为 undefined，表示默认不进行行或列的合并操作
+     */
   },
-  // 获取数据的接口
   listApi: {
     type: Function,
     required: false,
+    default: undefined,
+    /**
+     * 默认值为 undefined，表示如果未提供获取数据的接口函数，则需要通过其他方式提供表格数据
+     */
   },
-  // 表格使用的字典
   dict: {
-    type: Array<string>,
+    type: Array as () => string[],
     default: () => [],
+    /**
+     * 默认值为一个空数组，表示初始时没有使用字典进行数据映射
+     */
   },
-  // 导出数据的接口
   exportApi: {
     type: Function,
     required: false,
+    default: undefined,
+    /**
+     * 默认值为 undefined，表示如果未提供导出数据的接口函数，则无法进行数据导出操作
+     */
   },
-  // 是否显示序号
   tableIndex: {
     type: Boolean,
     default: false,
+    /**
+     * 默认值为 false，表示默认不显示表格的序号列
+     */
   },
-  // 选择框样式
   select: {
     type: String,
     default: 'single',
+    /**
+     * 默认值为 'single'，表示表格选择框默认使用单选样式
+     */
   },
-  // 主键
   pk: {
     type: String,
     default: 'id',
+    /**
+     * 默认值为 'id'，表示表格数据的主键字段名为 'id'
+     */
   },
-  // 选中行数据
   checkedRows: {
-    type: Array,
+    type: Array as () => any[],
     default: () => [],
+    /**
+     * 默认值为一个空数组，表示初始时表格中没有选中的行
+     */
   },
-  // 表格字段配置
   fieldList: {
     type: Array<Field>,
     required: true,
     default: () => [],
+    /**
+     * 该 prop 是必需的，默认值为一个空数组，表示初始时没有定义表格的字段配置
+     */
   },
-  // 表格数据配置
   modelValue: {
     type: Array,
     required: false,
     default: () => [],
+    /**
+     * 默认值为一个空数组，表示初始时没有提供表格要展示的数据
+     */
   },
   loading: {
     type: Boolean,
+    default: undefined,
+    /**
+     * 默认值为 undefined，表示如果未提供加载状态标识，则不控制加载显示效果
+     */
   },
-  // 操作栏配置
   handleBtn: {
     type: Object,
     default: () => {},
+    /**
+     * 默认值为一个空对象，表示初始时操作栏没有任何配置
+     */
   },
-  // 操作按钮是否不可点击
   rowBtnDisable: {
     type: Function,
     default: () => false,
+    /**
+     * 默认值为一个返回 false 的函数，表示默认情况下表格行操作按钮都是可点击的
+     */
   },
-  // 操作按钮是否隐藏
   rowBtnHidden: {
     type: Function,
     default: () => true,
+    /**
+     * 默认值为一个返回 true 的函数，表示默认情况下表格行操作按钮都是隐藏的
+     */
   },
-  // 操作按钮是否不可点击
   headerBtnDisable: {
     type: Function,
     default: () => false,
+    /**
+     * 默认值为一个返回 false 的函数，表示默认情况下表格顶部操作按钮都是可点击的
+     */
   },
-  // 操作按钮是否隐藏
   headerBtnHidden: {
     type: Function,
     default: () => true,
+    /**
+     * 默认值为一个返回 true 的函数，表示默认情况下表格顶部操作按钮都是隐藏的
+     */
   },
-  // 是否分页
   pager: {
     type: Boolean,
     default: true,
+    /**
+     * 默认值为 true，表示默认开启表格的分页功能
+     */
   },
-  // 重置到第一页
+  search: {
+    type: Boolean,
+    default: true,
+    /**
+     * 默认值为 true，表示默认开启表格的配置化搜索功能
+     */
+  },
   reloadCurrentPage: {
     type: Number,
+    default: undefined,
+    /**
+     * 默认值为 undefined，表示初始时不触发表格跳转到指定页的操作
+     */
   },
-  // 查询条件
   query: {
     type: Object,
     default: () => {},
+    /**
+     * 默认值为一个空对象，表示初始时没有提供表格的查询条件
+     */
   },
-  // 刷新
   refresh: {
     type: Number,
+    default: 0,
+    /**
+     * 默认值为 undefined，表示初始时不触发表格数据的刷新操作
+     */
   },
-  // 开启初始化后自动刷新
   mountedRefresh: {
     type: Boolean,
     default: true,
+    /**
+     * 默认值为 true，表示表格初始化后默认自动刷新数据
+     */
   },
 })
 
-const normalTableRef = ref<any>('')
+const normalTableRef = ref<InstanceType<typeof ElTable>>()
+const ruleFormRef = ref<InstanceType<typeof ElForm>>()
 let $route = useRoute()
 const columnStore = useColumnStore()
 const { theme } = storeToRefs(useSettingStore())
@@ -163,11 +234,13 @@ const $emit = defineEmits([
   'update:modelValue',
   'update:loading',
 ])
+
 // 分页信息
 const pagerInfo = ref({
   layout: 'total,sizes,prev,pager,next,jumper',
   pageSizes: [10, 20, 50, 100],
 })
+
 // 分页查询条件
 const pagerQuery = ref({
   // 总条数
@@ -178,29 +251,33 @@ const pagerQuery = ref({
   size: 10,
 })
 
+const tableInfo = ref({
+  // 显示的列
+  showFieldList: [] as Field[],
+  // 当前查询条件列
+  currentField: {} as Field,
+})
+
+const tableData = ref({
+  // 表格的值
+  rows: <any>[],
+})
+
 /**
  * 表格 loading
  */
 const tableLoading = computed({
   get: () => {
-    return props.loading
+    return props.loading as boolean
   },
   set: (value) => {
     $emit('update:loading', value)
   },
 })
 
-const tableInfo = ref({
-  // 显示的列
-  showFieldList: [] as Field[],
-})
-
-const tableData = ref({
-  // 表格的值
-  rows: [] as any[],
-})
-
 let singleSelectValue = ref<undefined | any | number>()
+let queryBuilderRef = ref<any>()
+let queryBuilderShow = ref<boolean>(false)
 let currentRows = ref<any>()
 
 /**
@@ -241,8 +318,13 @@ onUpdated(() => {
  */
 const refreshData = () => {
   if (props.mountedRefresh) {
-    getList()
+    getTableList()
   }
+}
+
+const handleHeaderSetting = (item: any) => {
+  queryBuilderShow.value = true
+  tableInfo.value.currentField = item
 }
 
 /**
@@ -310,41 +392,43 @@ const initTbHeaderBtn = computed(() => props.tbHeaderBtn as Btn[])
 /**
  * 排序列
  */
-const sortField = new Map()
+const sortField = new Map<string, any>()
 
-const setOrder = (order?: ColumnSort, obj?: QueryParams) => {
+const checkRuleFormRef = async () => {
+  try {
+    await ruleFormRef.value.validate()
+  } catch (err: any) {
+    showErrorMessages(err)
+  }
+}
+
+const showErrorMessages = (errorJson: any) => {
+  let errorHtml = '<ul>'
+  for (const field in errorJson) {
+    errorJson[field].forEach((error: any) => {
+      errorHtml += `<li>${error.message}</li>`
+    })
+  }
+  errorHtml += '</ul>'
+
+  ElMessageBox({
+    title: '错误提示',
+    message: errorHtml,
+    dangerouslyUseHTMLString: true, // 允许使用 HTML 字符串
+    type: 'error',
+    confirmButtonText: '确定',
+  })
+}
+const collectOrder = (order?: ColumnSort) => {
   // 检查是否有排序字段和排序顺序
-  if (order) {
-    // 获取排序顺序（升序或降序）
-    const ascSortOrder = SORT.ASE
-    const descSortOrder = SORT.DESC
-    // 获取当前排序字段列表
-    let ascSortProps = sortField.get(ascSortOrder) || ''
-    let descSortProps = sortField.get(descSortOrder) || ''
+  if (!order) return
 
-    // 获取当前排序字段
-    const prop = camelCaseToUnderscore(order.prop) + '|'
-    // 检查当前字段是否已经存在于排序字段列表中
-    const propIndexAsc = ascSortProps.indexOf(prop)
-    const propIndexDesc = descSortProps.indexOf(prop)
-
-    // 如果字段已存在，则移除
-    if (propIndexAsc !== -1 || propIndexDesc !== -1) {
-      ascSortProps = ascSortProps.replace(prop, '')
-      descSortProps = descSortProps.replace(prop, '')
-    }
-
-    const sortOrder = order.order
-    if (ascSortOrder === sortOrder) {
-      ascSortProps += prop
-    } else {
-      descSortProps += prop
-    }
-    sortField.set(ascSortOrder, ascSortProps)
-    sortField.set(descSortOrder, descSortProps)
-    if (obj) {
-      obj['sort'] = Object.fromEntries(sortField)
-    }
+  const key = camelCaseToUnderscore(order.prop)
+  const hasProp = sortField.has(key)
+  if (hasProp && !order?.order) {
+    sortField.delete(key) //取消排序字段
+  } else {
+    sortField.set(key, order?.order)
   }
 }
 
@@ -354,24 +438,40 @@ const setOrder = (order?: ColumnSort, obj?: QueryParams) => {
  * @param order
  */
 const handleSortChange = (order: ColumnSort) => {
-  getList({
+  collectOrder({
     order: order.order,
     prop: order.prop,
   })
+  getTableList()
+}
+
+const handleHeaderCellStyle = (params: any) => {
+  const key = camelCaseToUnderscore(params.column.property || '')
+  if (sortField.has(key)) {
+    params.column.order = sortField.get(key)
+  }
+}
+
+let sqlParam = ref<any>({})
+const handleSqlParamsSubmit = (_sqlParam: any) => {
+  sqlParam.value = _sqlParam
+  getTableList()
 }
 
 /**
  * 处理查询条件
  */
-const handleParams = (order?: ColumnSort) => {
+const handleParams = () => {
   const obj = {} as QueryParams
+  collectOrder()
   for (const key in props.query) {
     if (props.query[key] || props.query[key] === 0) {
       obj[key] = props.query[key]
     }
   }
+  obj.sort = Object.fromEntries(sortField)
 
-  setOrder(order, obj)
+  obj.condition = sqlParam.value
 
   // 根据分页条件，整个查询
   return props.pager ? { ...obj, ...pagerQuery.value } : obj
@@ -380,7 +480,7 @@ const handleParams = (order?: ColumnSort) => {
 /**
  * 获取数据
  */
-const getList = async (order?: ColumnSort) => {
+const getTableList = async () => {
   singleSelectValue.value = undefined
   currentRows.value = []
 
@@ -398,7 +498,7 @@ const getList = async (order?: ColumnSort) => {
 
   try {
     tableLoading.value = true
-    const response: any = await props.listApi(handleParams(order))
+    const response: any = await props.listApi(handleParams())
     tableData.value.rows = []
     if (props.pager) {
       tableData.value.rows = response?.data.records
@@ -465,7 +565,7 @@ const setSingleCheckedList = () => {
  */
 const handleSizeChange = (size: number) => {
   pagerQuery.value.size = size
-  getList()
+  getTableList()
 }
 
 /**
@@ -475,7 +575,7 @@ const handleSizeChange = (size: number) => {
  */
 const handleCurrentChange = (current: number) => {
   pagerQuery.value.current = current
-  getList()
+  getTableList()
 }
 
 /**
@@ -529,7 +629,7 @@ const handleRowDbClick = (row: any) => {
  */
 const handleTableRowClick = (btn: Btn, row: any, index: number) => {
   switch (btn.event) {
-    case 'delete' || 'remove':
+    case 'delete':
       confirmBox(() => {
         btn.eventHandle ? btn.eventHandle(row, index) : useMessage().warning(t('common.noHandle'))
       })
@@ -549,7 +649,7 @@ const handleTableRowClick = (btn: Btn, row: any, index: number) => {
  */
 const handleHeadBtnClick = (btn: Btn, rows: any, index: number) => {
   switch (btn.event) {
-    case 'delete' || 'remove':
+    case 'delete':
       if (!rows) {
         useMessage().warning(t('common.delTip'))
         return
@@ -652,7 +752,7 @@ const handleSetColumnVisible = async (value: boolean, field: Field) => {
     visible: value,
   }
   await columnStore.setColumnByMenu(data)
-  await getList()
+  await getTableList()
 }
 
 /**
@@ -662,7 +762,7 @@ watch(
   () => props.reloadCurrentPage,
   () => {
     pagerQuery.value.current = 1
-    getList()
+    getTableList()
   },
 )
 /**
@@ -671,7 +771,7 @@ watch(
 watch(
   () => props.refresh,
   () => {
-    getList()
+    getTableList()
   },
 )
 
@@ -717,6 +817,10 @@ const handleOnEnd = () => {
 const handleSliderChange = (row: any) => {
   row.width = row.sliderWidth
 }
+
+defineExpose({
+  checkRuleFormRef,
+})
 </script>
 
 <template>
@@ -742,7 +846,7 @@ const handleSliderChange = (row: any) => {
               class="ml-2"
               style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
               :disabled="row.disabled"
-              @change="getList()"
+              @change="getTableList()"
             />
           </template>
         </el-table-column>
@@ -799,10 +903,10 @@ const handleSliderChange = (row: any) => {
               :disabled="item.disabled || headerBtnDisable(item.event, currentRows)"
               v-if="item.hidden || headerBtnHidden(item.event, currentRows)"
               v-has="item.permission"
-              @svg-btn-click="handleHeadBtnClick(item, currentRows, index)"
+              @svg-btn-click="handleHeadBtnClick(item, currentRows, singleSelectValue)"
             />
           </div>
-          <slot name="tbHeaderBtn"></slot>
+          <slot name="tbHeaderBtn" />
         </div>
         <div class="tool-btn">
           <svg-button
@@ -823,151 +927,188 @@ const handleSliderChange = (row: any) => {
     </template>
 
     <div class="table">
-      <el-table
-        ref="normalTableRef"
-        :fit="true"
-        :data="tableData.rows"
-        :max-height="tableHeight"
-        :height="tableHeight"
-        v-loading="tableLoading"
-        border
-        stripe
-        row-key="id"
-        :key="tableKey"
-        :summary-method="props.summaryMethod"
-        :span-method="props.spanMethod"
-        :style="tableStyle"
-        :show-summary="showSummary"
-        :highlight-current-row="true"
-        @selection-change="handleSelectionChange"
-        @row-dblclick="handleRowDbClick"
-        @row-click="handleRowClick"
-        @sort-change="handleSortChange"
-      >
-        <el-table-column
-          v-if="props.select === 'multi'"
-          key="selection"
-          fixed="left"
-          align="center"
-          type="selection"
-          width="60"
-        />
-
-        <el-table-column
-          v-else-if="props.select === 'single'"
-          key="singleSelect"
-          fixed="left"
-          type="index"
-          align="center"
-          width="60"
+      <query-builder
+        v-if="search"
+        v-model="queryBuilderShow"
+        ref="queryBuilderRef"
+        :table-fields="tableInfo.showFieldList"
+        :current-field="tableInfo.currentField"
+        @sql-params-submit="handleSqlParamsSubmit"
+      />
+      <el-form ref="ruleFormRef" :model="tableData" label-width="0px" status-icon>
+        <el-table
+          ref="normalTableRef"
+          :fit="true"
+          :data="tableData.rows"
+          :max-height="tableHeight"
+          :height="tableHeight"
+          v-loading="tableLoading"
+          border
+          stripe
+          row-key="id"
+          :key="tableKey"
+          :summary-method="props.summaryMethod"
+          :span-method="props.spanMethod"
+          :style="tableStyle"
+          :show-summary="showSummary"
+          :highlight-current-row="true"
+          :header-cell-style="{ textAlign: 'center' }"
+          :header-cell-class-name="
+            (params: any) => {
+              handleHeaderCellStyle(params)
+            }
+          "
+          @selection-change="handleSelectionChange"
+          @row-dblclick="handleRowDbClick"
+          @row-click="handleRowClick"
+          @sort-change="handleSortChange"
         >
-          <template #default="scope">
-            <el-radio v-model="singleSelectValue" :label="scope.$index">{{}}</el-radio>
-          </template>
-        </el-table-column>
-        <el-table-column
-          :label="t('common.no')"
-          fixed
-          align="center"
-          v-if="props.tableIndex"
-          type="index"
-          :width="tableField.length === 0 ? '' : 66"
-        />
+          <el-table-column
+            v-if="props.select === 'multi'"
+            key="selection"
+            fixed="left"
+            align="center"
+            type="selection"
+            width="60"
+          />
 
-        <el-table-column
-          v-for="(item, index) in tableField"
-          class-name="input-column"
-          :key="index"
-          :prop="item.prop"
-          :label="item.label"
-          :align="item.align || 'center'"
-          :sortable="item.sortable"
-          :type="item.type"
-          :header-align="item.align || 'center'"
-          :width="item.width || ''"
-          :min-width="item.minWidth || ''"
-          :show-overflow-tooltip="item.showOverflowTooltip"
-          :fixed="item.fixed"
-        >
-          <template #default="scope">
-            <template v-if="item.children">
-              <!-- 多级表头 -->
-              <el-table-column
-                v-for="(_item, _index) in item.children"
-                class-name="input-column"
-                :key="_index"
-                :label="_item.label"
-                :sortable="_item.sortable"
-                :align="_item.align || 'center'"
-                :header-align="_item.align || 'center'"
-                :width="_item.width || ''"
-                :min-width="_item.minWidth || ''"
-                :show-overflow-tooltip="_item.showOverflowTooltip"
-                :fixed="_item.fixed"
+          <el-table-column
+            v-else-if="props.select === 'single'"
+            key="singleSelect"
+            fixed="left"
+            type="index"
+            align="center"
+            width="60"
+          >
+            <template #default="scope">
+              <el-radio v-model="singleSelectValue" :label="scope.$index">{{}}</el-radio>
+            </template>
+          </el-table-column>
+          <el-table-column
+            :label="t('common.no')"
+            fixed
+            align="center"
+            v-if="props.tableIndex"
+            type="index"
+            :width="tableField.length === 0 ? '' : 66"
+          />
+
+          <el-table-column
+            v-for="(item, index) in tableField"
+            class-name="input-column"
+            :key="index"
+            :prop="item.prop"
+            :label="item.label"
+            :align="item.align || 'center'"
+            :sortable="item.sortable"
+            :type="item.type"
+            :header-align="item.align || 'center'"
+            :width="item.width || ''"
+            :min-width="item.minWidth || ''"
+            :show-overflow-tooltip="item.showOverflowTooltip"
+            :fixed="item.fixed"
+          >
+            <template #header>
+              {{ item.label }}
+              <div
+                @click="handleHeaderSetting(item)"
+                style="
+                  cursor: pointer;
+                  display: inline-flex;
+                  justify-content: center;
+                  align-items: center;
+                  padding-left: 2px;
+                "
               >
-                <template #default="_">
-                  <!-- slot自定义列 -->
-                  <template v-if="_item.type === 'slot'">
-                    <slot :name="`col-${_item.prop}`" :row="scope.row" :index="scope.$index" />
+                <svg-icon name="setting" />
+              </div>
+            </template>
+            <template #default="scope">
+              <template v-if="item.children">
+                <!-- 多级表头 -->
+                <el-table-column
+                  v-for="(_item, _index) in item.children"
+                  class-name="input-column"
+                  :key="_index"
+                  :label="_item.label"
+                  :sortable="_item.sortable"
+                  :align="_item.align || 'center'"
+                  :header-align="_item.align || 'center'"
+                  :width="_item.width || ''"
+                  :min-width="_item.minWidth || ''"
+                  :show-overflow-tooltip="_item.showOverflowTooltip"
+                  :fixed="_item.fixed"
+                >
+                  <template #default="_">
+                    <!-- slot自定义列 -->
+                    <template v-if="_item.type === 'slot'">
+                      <slot :name="`col-${_item.prop}`" :row="scope.row" :index="scope.$index" />
+                    </template>
+
+                    <table-item
+                      @reload-data-list="getTableList"
+                      :scope="{
+                        row: _.row[item.prop],
+                        $index: _.$index,
+                        column: _.column,
+                      }"
+                      :dict="dict"
+                      :table-field="_item"
+                      :key="_index"
+                    />
                   </template>
+                </el-table-column>
+              </template>
 
-                  <table-item
-                    @reload-data-list="getList"
-                    :scope="{
-                      row: _.row[item.prop],
-                      $index: _.$index,
-                      column: _.column,
-                    }"
-                    :dict="dict"
-                    :table-field="_item"
-                    :key="_index"
-                  />
-                </template>
-              </el-table-column>
-            </template>
+              <!-- slot自定义列 -->
+              <template v-else-if="item.type === 'slot'">
+                <slot :name="`col-${item.prop}`" :row="scope.row" :index="scope.$index" :key="index" />
+              </template>
 
-            <!-- slot自定义列 -->
-            <template v-else-if="item.type === 'slot'">
-              <slot :name="`col-${item.prop}`" :row="scope.row" :index="scope.$index" :key="index" />
-            </template>
+              <template v-else-if="item.type === 'expand'">
+                <slot name="expand" :row="scope.row" :index="scope.$index" :key="index" />
+              </template>
 
-            <template v-else-if="item.type === 'expand'">
-              <slot name="expand" :row="scope.row" :index="scope.$index" :key="index" />
-            </template>
-
-            <table-item @reload-data-list="getList" :dict="dict" :scope="scope" :table-field="item" :key="index" />
-          </template>
-        </el-table-column>
-
-        <el-table-column
-          v-if="handleBtnOperate"
-          key="handle"
-          :fixed="initHandleBtn.fixed"
-          :align="initHandleBtn.align || 'center'"
-          :label="initHandleBtn.label || t('common.operate')"
-          :width="initHandleBtn.width"
-          :min-width="initHandleBtn.minWidth"
-        >
-          <template #default="scope">
-            <template v-for="(item, index) in initHandleBtn.btList" :key="index">
-              <!-- 自定义操作类型 -->
-              <slot v-if="item.slot" :name="`${item.slotName}`" :data="{ item, row: scope.row }"></slot>
-              <!-- 操作按钮 -->
-              <svg-button
+              <table-item
+                @reload-data-list="getTableList"
+                :dict="dict"
+                :scope="scope"
+                :table-field="item"
                 :key="index"
-                v-has="item.permission"
-                :link="initHandleBtn.link || item.link"
-                :icon="item.icon"
-                :type="item.type"
-                :label="item.label"
-                :disabled="item.disabled || rowBtnDisable(item.event, scope.row)"
-                v-if="item.hidden || rowBtnHidden(item.event, scope.row)"
-                @svg-btn-click="handleTableRowClick(item, scope.row, scope.$index)"
               />
             </template>
-          </template>
-        </el-table-column>
-      </el-table>
+          </el-table-column>
+
+          <el-table-column
+            v-if="handleBtnOperate"
+            key="handle"
+            :fixed="initHandleBtn.fixed"
+            :align="initHandleBtn.align || 'center'"
+            :label="initHandleBtn.label || t('common.operate')"
+            :width="initHandleBtn.width"
+            :min-width="initHandleBtn.minWidth"
+          >
+            <template #default="scope">
+              <template v-for="(item, index) in initHandleBtn.btList" :key="index">
+                <!-- 自定义操作类型 -->
+                <slot v-if="item.slot" :name="`${item.slotName}`" :data="{ item, row: scope.row }"></slot>
+                <!-- 操作按钮 -->
+                <svg-button
+                  :key="index"
+                  v-has="item.permission"
+                  v-if="item.hidden || rowBtnHidden(item.event, scope.row)"
+                  :link="initHandleBtn.link || item.link"
+                  :icon="item.icon"
+                  :type="item.type"
+                  :label="item.label"
+                  :disabled="item.disabled || rowBtnDisable(item.event, scope.row)"
+                  @svg-btn-click="handleTableRowClick(item, scope.row, scope.$index)"
+                />
+              </template>
+            </template>
+          </el-table-column>
+        </el-table>
+      </el-form>
     </div>
     <template v-if="enablePager">
       <div class="table-pagination">

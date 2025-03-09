@@ -13,7 +13,6 @@ import { listDeptUser } from '@/api/auth/user'
 import { UserRecord } from '@/api/auth/user/type.ts'
 import useMsgStore from '@/store/modules/msg.ts'
 import useUserStore from '@/store/modules/user.ts'
-import useWidth from '@/hooks/dialogWidth'
 import { useMessage } from '@/hooks/message'
 
 defineOptions({
@@ -73,7 +72,7 @@ const initDeptSelect = async () => {
     const response: any = await selectDept()
     deptOption.value = response.data
   } catch (err: any) {
-    useMessage().error(err.message)
+    useMessage().error(`${t('common.fail')}` + err.message)
   }
 }
 
@@ -93,7 +92,7 @@ const handleSendMsgFormSubmit = async () => {
 
   if (currentMethod.value === 'USER') {
     msgStore.stompClient?.publish({
-      destination: '/message/asyncSendMsgToUser',
+      destination: '/send/asyncSendMsgToUser',
       headers: {
         Authorization: userStore.accessToken,
         username: userStore.userInfo.username,
@@ -107,7 +106,7 @@ const handleSendMsgFormSubmit = async () => {
   }
   if (currentMethod.value === 'DEPT') {
     msgStore.stompClient?.publish({
-      destination: '/message/syncSendMsgDeptUser',
+      destination: '/send/syncSendMsgDeptUser',
       headers: {
         Authorization: userStore.accessToken,
         username: userStore.userInfo.username,
@@ -150,7 +149,6 @@ defineExpose({
 <template>
   <el-dialog
     v-model="visible"
-    :width="useWidth()"
     :title="t('msg.common.sendMsg')"
     :close-on-click-modal="false"
     :close-on-press-escape="false"

@@ -14,13 +14,13 @@ enum API {
 /**
  * 列表
  *
- * @param params
+ * @param data
  */
-export function page(params: RowPermissionQuery): AxiosPromise<RowPermissionResponseData> {
+export function page(data: RowPermissionQuery): AxiosPromise<RowPermissionResponseData> {
   return request({
-    url: API.PERMISSION_RESTFUL_URL,
-    method: 'get',
-    params: params,
+    url: `${API.PERMISSION_RESTFUL_URL}/page`,
+    method: 'post',
+    data,
   })
 }
 
@@ -45,7 +45,7 @@ export function addPermission(data: RowPermissionForm): AxiosPromise<RowPermissi
   return request({
     url: API.PERMISSION_RESTFUL_URL,
     method: 'post',
-    data: data,
+    data,
   })
 }
 
@@ -59,7 +59,7 @@ export function editPermission(id: number, data: RowPermissionForm): AxiosPromis
   return request({
     url: `${API.PERMISSION_RESTFUL_URL}/${id}`,
     method: 'put',
-    data: data,
+    data,
   })
 }
 
@@ -97,7 +97,7 @@ export function exportExcel(params: RowPermissionQuery): AxiosPromise<RowPermiss
  */
 export function checkPermissionCode(permissionCode: string, permissionId?: number): AxiosPromise<any> {
   return request({
-    url: `${API.PERMISSION_RESTFUL_URL}/checkPermissionCode`,
+    url: `${API.PERMISSION_RESTFUL_URL}/checkRowPermissionCode`,
     method: 'get',
     params: {
       permissionId,

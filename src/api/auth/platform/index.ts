@@ -14,13 +14,13 @@ enum API {
 /**
  * 列表
  *
- * @param params
+ * @param data
  */
-export function page(params: PlatformQuery): AxiosPromise<PlatformResponseData> {
+export function page(data: PlatformQuery): AxiosPromise<PlatformResponseData> {
   return request({
-    url: API.PLATFORM_RESTFUL_URL,
-    method: 'get',
-    params: params,
+    url: `${API.PLATFORM_RESTFUL_URL}/page`,
+    method: 'post',
+    data,
   })
 }
 
@@ -45,7 +45,7 @@ export function addPlatform(data: PlatformForm): AxiosPromise<ResponseData> {
   return request({
     url: API.PLATFORM_RESTFUL_URL,
     method: 'post',
-    data: data,
+    data,
   })
 }
 
@@ -59,7 +59,7 @@ export function editPlatform(id: number, data: PlatformForm): AxiosPromise<Respo
   return request({
     url: `${API.PLATFORM_RESTFUL_URL}/${id}`,
     method: 'put',
-    data: data,
+    data,
   })
 }
 

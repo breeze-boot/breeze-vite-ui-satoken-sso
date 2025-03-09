@@ -406,8 +406,8 @@ export default {
           this.$emit('commandStack-changed', event)
           this.$emit('update:modelValue', xml)
           this.$emit('change', xml)
-        } catch (e) {
-          console.error(`[Process Designer Warn]: ${e.message || e}`)
+        } catch (err) {
+          console.error(`[Process Designer Warn]: ${err.message || err}`)
         }
       })
       // 监听视图缩放变化
@@ -483,7 +483,7 @@ export default {
       return {
         filename: `${filename}.${type}`,
         href: `data:application/${type === 'svg' ? 'text/xml' : 'bpmn20-xml'};charset=UTF-8,${encodedData}`,
-        data: data,
+        data,
       }
     },
 

@@ -9,7 +9,7 @@ import useUserStore from '@/store/modules/user'
 import useSettingStore from '@/store/modules/setting.ts'
 import { SsoClientUrl } from '@/api/home/type.ts'
 import { getHomeSsoClient } from '@/api/home'
-import LoginUserPie from '@/views/home/component/LoginUserPie.vue'
+import LoginUserBar from '@/views/home/component/LoginUserBar.vue'
 
 let settings = useSettingStore().settings
 let userStore = useUserStore()
@@ -63,7 +63,7 @@ onMounted(() => {
             <span>在线统计</span>
           </div>
         </template>
-        <login-user-pie />
+        <login-user-bar />
       </el-card>
     </el-col>
     <el-col :xs="24" :sm="24" :md="12" :lg="12" :xl="12">

@@ -42,8 +42,6 @@ export interface DictState {
 export interface SettingState {
   refresh: boolean
   device: string
-  dialogWidth: string
-  drawnWidth: string
   theme: Theme
   settings: Settings
 }
