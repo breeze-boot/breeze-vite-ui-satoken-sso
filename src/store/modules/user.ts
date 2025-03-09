@@ -75,7 +75,7 @@ const useUserStore = defineStore('User', {
      * 退出登录
      */
     async logout() {
-      let href = import.meta.env.VITE_APP_SSO_BASE_SERVER
+      let href = import.meta.env.VITE_APP_BASE_SERVER
       const env = import.meta.env.MODE
       if (env !== 'development') {
         href += '/api'
