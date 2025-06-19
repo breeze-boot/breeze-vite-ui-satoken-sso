@@ -244,10 +244,10 @@ const handleDelete = async (rows: RoleRecords) => {
   try {
     const roleIds = rows.map((item: any) => item.id)
     await deleteRole(roleIds)
-    useMessage().success(`${t('common.delete') + t('common.success')}`)
+    useMessage().success(`${t('common.delete')} ${t('common.success')}`)
     reloadList()
   } catch (err: any) {
-    useMessage().error(`${t('common.fail')}` + err.message)
+    useMessage().error(`${t('common.fail')} ${err.message}`)
   }
 }
 
@@ -258,16 +258,6 @@ const handleDelete = async (rows: RoleRecords) => {
  */
 const handleUpdate = (row: any) => {
   AddOrEditHandle(row.id)
-}
-
-/**
- * 选中行，设置当前行currentRow
- *
- * @param row 选择的行数据
- */
-function handleRowClick(row: RoleRecord) {
-  currentRows = [row]
-  console.log(currentRows)
 }
 
 /**
@@ -329,7 +319,6 @@ const handleSelectionChange = (rows: RoleRecords) => {
     :tb-header-btn="tableInfo.tbHeaderBtn"
     :handle-btn="tableInfo.handleBtn"
     @selection-change="handleSelectionChange"
-    @handle-row-click="handleRowClick"
   />
 
   <!-- 新增 / 修改 Dialog -->

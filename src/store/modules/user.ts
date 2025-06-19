@@ -2,10 +2,11 @@
  * @author: gaoweixuan
  * @since: 2023-11-12
  */
-import { defineStore } from 'pinia'
+import { defineStore, StoreDefinition } from 'pinia'
+import { ref, computed } from 'vue'
 import type { LoginResponseData } from '@/api/login/type'
-import { type UserState } from './types/types'
-import { userInfo } from '@/api/login'
+import { userInfoAPI } from '@/api/login'
+import type { UserState } from '@/store/modules/types/types.ts'
 import {
   CLEAR_STORAGE,
   GET_OBJ_STORAGE,
@@ -20,120 +21,126 @@ import { CookiesKey, CookiesStorage } from '@/utils/cookies.ts'
 
 /**
  * 过滤出按钮权限
- *
- * @param userInfo
  */
 const filterPermissions = (userInfo: UserInfoData): string[] => {
-  if (!userInfo) {
-    return []
-  }
-  const PERMISSIONS: string[] = []
-
-  ;(userInfo.authorities as AuthoritiesDatas).forEach((item: AuthoritiesData) => {
-    PERMISSIONS.push(item.authority)
-  })
-  return PERMISSIONS
+  if (!userInfo) return []
+  return (userInfo.authorities as AuthoritiesDatas).map((item: AuthoritiesData) => item.authority)
 }
 
-const useUserStore = defineStore('User', {
-  state: (): UserState => {
-    return {
-      userInfo: GET_OBJ_STORAGE(StorageName.UserInfo) as UserInfoData,
-      tenantId: CookiesStorage.get(CookiesKey.XTenantId),
-      accessToken: GET_STRING_STORAGE(StorageName.AccessToken),
-      roleCodes: GET_STR_ARRAY_STORAGE(StorageName.RoleCodes),
-      permissions: GET_STR_ARRAY_STORAGE(StorageName.Permissions),
-    }
-  },
-  actions: {
-    /**
-     * 用户信息
-     */
-    async storeUserInfo(): Promise<LoginResponseData> {
-      const response: any = await userInfo()
+const useUserStore: StoreDefinition<'User', UserState> = defineStore('User', () => {
+  // 状态管理
+  const userInfo = ref<UserInfoData>((GET_OBJ_STORAGE(StorageName.UserInfo) as UserInfoData) || ({} as UserInfoData))
+  const tenantId = ref<number | null>(CookiesStorage.get(CookiesKey.XTenantId))
+  const accessToken = ref<string>(GET_STRING_STORAGE(StorageName.AccessToken) || '')
+  const roleCodes = ref<string[]>(GET_STR_ARRAY_STORAGE(StorageName.RoleCodes) || [])
+  const permissions = ref<string[]>(GET_STR_ARRAY_STORAGE(StorageName.Permissions) || [])
 
-      if (response.data) {
-        const user_info = response.data as UserInfoData
-        // 持久化
-        this.userInfo = user_info as UserInfoData
-        SET_OBJ_STORAGE(StorageName.UserInfo, this.userInfo as UserInfoData)
-
-        this.tenantId = user_info.tenantId
-        CookiesStorage.set(CookiesKey.XTenantId, this.userInfo.tenantId)
-
-        this.roleCodes = user_info.userRoleCodes
-        SET_STR_ARRAY_STORAGE(StorageName.RoleCodes, this.roleCodes)
-
-        this.permissions = filterPermissions(user_info)
-        SET_STR_ARRAY_STORAGE(StorageName.Permissions, this.permissions)
-
-        return response
-      }
-      return {} as LoginResponseData
-    },
-    /**
-     * 退出登录
-     */
-    async logout() {
-      let href = import.meta.env.VITE_APP_BASE_SERVER
-      const env = import.meta.env.MODE
-      if (env !== 'development') {
-        href += '/api'
-      }
-      href += '/sso/logout?satoken=' + this.accessToken + '&back=' + encodeURIComponent(location.origin)
-      window.location.href = href
-      await this.clearLoginInfo()
-    },
-    /**
-     * 退出登录
-     */
-    async clearLoginInfo() {
-      this.userInfo = {} as UserInfoData
-      this.accessToken = '' as string
-      this.permissions = [] as string[]
-      this.roleCodes = [] as string[]
-      CLEAR_STORAGE()
+  // 持久化方法
+  const persistUserInfo = () => SET_OBJ_STORAGE(StorageName.UserInfo, userInfo.value)
+  const persistTenantId = () => {
+    if (tenantId.value !== null) {
+      CookiesStorage.set(CookiesKey.XTenantId, tenantId.value)
+    } else {
       CookiesStorage.remove(CookiesKey.XTenantId)
-    },
-    /**
-     * 保存登录信息
-     */
-    async storeLoginInfo(accessToken: string) {
-      this.accessToken = accessToken
-      SET_STRING_STORAGE(StorageName.AccessToken, this.accessToken)
-    },
-    /**
-     * 保存租户信息
-     */
-    storeTenantId(tenantId: number) {
-      this.tenantId = tenantId
-      CookiesStorage.set(CookiesKey.XTenantId, tenantId)
-    },
-  },
-  getters: {
-    /**
-     * 获取权限信息
-     *
-     * @param state
-     */
-    getPermissions: (state: UserState) => {
-      return async (): Promise<string[]> => {
-        return (
-          state.permissions.length > 0 ? state.permissions : GET_STR_ARRAY_STORAGE(StorageName.Permissions)
-        ) as string[]
-      }
-    },
-    /**
-     * 获取角色信息
-     *
-     * @param state
-     */
-    getRoleCodes: (state: UserState) => {
-      return async (): Promise<string[]> => {
-        return (state.roleCodes.length > 0 ? state.roleCodes : GET_STR_ARRAY_STORAGE(StorageName.RoleCodes)) as string[]
-      }
-    },
-  },
-})
+    }
+  }
+  const persistAccessToken = () => SET_STRING_STORAGE(StorageName.AccessToken, accessToken.value)
+  const persistRoleCodes = () => SET_STR_ARRAY_STORAGE(StorageName.RoleCodes, roleCodes.value)
+  const persistPermissions = () => SET_STR_ARRAY_STORAGE(StorageName.Permissions, permissions.value)
 
+  // 获取用户信息
+  const storeUserInfo = async (): Promise<LoginResponseData> => {
+    try {
+      const response: any = await userInfoAPI()
+      const { data } = response
+      if (!data) return {} as LoginResponseData
+
+      userInfo.value = data
+      tenantId.value = data.tenantId
+      roleCodes.value = data.userRoleCodes
+      permissions.value = filterPermissions(data)
+
+      // 显式持久化
+      persistUserInfo()
+      persistTenantId()
+      persistRoleCodes()
+      persistPermissions()
+
+      return response
+    } catch (error) {
+      console.error('获取用户信息失败:', error)
+      return {} as LoginResponseData
+    }
+  }
+
+  // 退出登录
+  const logout = async () => {
+    const env = import.meta.env.MODE
+    const baseUrl = import.meta.env.VITE_APP_BASE_SERVER
+    const apiPath = env !== 'development' ? '/api' : ''
+
+    window.location.href = `${baseUrl}${apiPath}/sso/logout?satoken=${accessToken.value}&back=${encodeURIComponent(location.origin)}&${CookiesKey.XTenantId}=${CookiesStorage.get(CookiesKey.XTenantId)}`
+    await clearLoginInfo()
+  }
+
+  // 清除登录信息
+  const clearLoginInfo = () => {
+    userInfo.value = {} as UserInfoData
+    tenantId.value = null
+    accessToken.value = ''
+    roleCodes.value = []
+    permissions.value = []
+
+    // 显式持久化
+    persistUserInfo()
+    persistTenantId()
+    persistAccessToken()
+    persistRoleCodes()
+    persistPermissions()
+
+    CLEAR_STORAGE()
+  }
+
+  // 保存登录信息
+  const storeLoginInfo = (token: string) => {
+    accessToken.value = token
+    persistAccessToken()
+  }
+
+  // 保存租户信息
+  const storeTenantId = (id: number) => {
+    tenantId.value = id
+    persistTenantId()
+  }
+
+  // 获取权限信息
+  const userPermissions = computed(() => {
+    return permissions.value.length > 0 ? permissions.value : GET_STR_ARRAY_STORAGE(StorageName.Permissions)
+  })
+
+  // 获取角色信息
+  const userRoleCodes = computed(() => {
+    return roleCodes.value.length > 0 ? roleCodes.value : GET_STR_ARRAY_STORAGE(StorageName.RoleCodes)
+  })
+
+  return {
+    // 状态
+    userInfo,
+    tenantId,
+    accessToken,
+    roleCodes,
+    permissions,
+
+    // 方法
+    storeUserInfo,
+    logout,
+    clearLoginInfo,
+    storeLoginInfo,
+    storeTenantId,
+
+    // 获取器
+    userPermissions,
+    userRoleCodes,
+  }
+})
 export default useUserStore

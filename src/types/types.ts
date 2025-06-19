@@ -147,7 +147,6 @@ export enum StorageName {
   AcceptLanguage = 'Accept-Language',
   Authorization = 'Authorization',
   mixMenuRoutes = 'MIX_MENU_ROUTES',
-  menuRoutes = 'MENU_ROUTES',
   CurrentTab = 'CURRENT_TAB',
   CurrentTabName = 'CURRENT_TAB_NAME',
   CacheTabs = 'CACHE_TABS',
@@ -270,4 +269,12 @@ export interface ColumnCacheData {
   menu?: string
   columns: string[]
   visible?: boolean
+}
+
+/**
+ * 文件提交表单类型声明
+ */
+export interface FileForm {
+  name: string
+  url: string
 }

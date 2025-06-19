@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import AutoImport from 'unplugin-auto-import/vite'
 import DefineOptions from 'unplugin-vue-define-options/vite'
 import path from 'path'
+import UnoCSS from 'unocss/vite'
 import viteCompression from 'vite-plugin-compression'
 import VueSetupExtend from 'vite-plugin-vue-setup-extend'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
@@ -22,6 +23,7 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
     base: './',
     plugins: [
       vue(),
+      UnoCSS(),
       AutoImport({
         imports: ['vue', '@vueuse/core', 'pinia', 'vue-router', 'vue-i18n'],
         resolvers: [ElementPlusResolver()],
@@ -148,6 +150,7 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
       host: '0.0.0.0', // 服务器地址
       port: Number(env.VITE_APP_BASE_PORT), // 服务器端口号
       open: true, // 运行是否自动打开浏览器
+      allowedHosts: true,
       proxy: {
         [env.VITE_APP_BASE_API]: {
           target: env.VITE_APP_BASE_SERVER,

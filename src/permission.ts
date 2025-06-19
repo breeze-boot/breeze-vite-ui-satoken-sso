@@ -8,7 +8,7 @@ import useMenuStore from '@/store/modules/menu'
 
 nprogress.configure({ showSpinner: false })
 
-const whiteRoute: string[] = ['/redirect', '/sso-login', '/sso']
+const whiteRoute: string[] = ['/redirect', '/ding-login', '/ding', '/sso-login', '/sso']
 const userStore = useUserStore(pinia)
 const menuStore = useMenuStore(pinia)
 
@@ -54,7 +54,7 @@ router.beforeEach(async (to, from, next) => {
   } else {
     // 菜单未初始化
     try {
-      await menuStore.listPermission() // 获取权限数据
+      await menuStore.getPermission() // 获取权限数据
       next({ ...to, replace: true }) // 加载菜单后重定向
     } catch (error) {
       await userStore.logout() // 登出操作

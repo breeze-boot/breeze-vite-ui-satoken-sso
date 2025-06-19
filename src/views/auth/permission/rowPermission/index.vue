@@ -177,10 +177,10 @@ const handleDelete = async (rows: RowPermissionRecords) => {
   try {
     const permissionIds = rows.map((item: any) => item.id)
     await deletePermission(permissionIds)
-    useMessage().success(`${t('common.delete') + t('common.success')}`)
+    useMessage().success(`${t('common.delete')} ${t('common.success')}`)
     reloadList()
   } catch (err: any) {
-    useMessage().error(`${t('common.fail')}` + err.message)
+    useMessage().error(`${t('common.fail')} ${err.message}`)
   }
 }
 
@@ -191,16 +191,6 @@ const handleDelete = async (rows: RowPermissionRecords) => {
  */
 const handleUpdate = (row: any) => {
   AddOrEditHandle(row.id)
-}
-
-/**
- * 选中行，设置当前行currentRow
- *
- * @param row 选择的行数据
- */
-function handleRowClick(row: RowPermissionRecord) {
-  currentRows = [row]
-  console.log(currentRows)
 }
 
 /**
@@ -262,7 +252,6 @@ const handleSelectionChange = (rows: RowPermissionRecords) => {
     :tb-header-btn="tableInfo.tbHeaderBtn"
     :handle-btn="tableInfo.handleBtn"
     @selection-change="handleSelectionChange"
-    @handle-row-click="handleRowClick"
   />
 
   <!-- 新增 / 修改 Dialog -->

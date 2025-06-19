@@ -191,10 +191,10 @@ const handleAdd = (id: number | undefined, flag: DIALOG_FLAG) => {
 const handleDelete = async (row: DeptRecord) => {
   try {
     await deleteDept(JSONBigInt.parse(row.id))
-    useMessage().success(`${t('common.delete') + t('common.success')}`)
+    useMessage().success(`${t('common.delete')} ${t('common.success')}`)
     reloadList()
   } catch (err: any) {
-    useMessage().error(`${t('common.fail')}` + err.message)
+    useMessage().error(`${t('common.fail')} ${err.message}`)
   }
 }
 
@@ -206,16 +206,6 @@ const handleDelete = async (row: DeptRecord) => {
  */
 const handleUpdate = (id: number | undefined, flag: DIALOG_FLAG.EDIT) => {
   AddOrEditHandle(id, flag)
-}
-
-/**
- * 选中行，设置当前行currentRow
- *
- * @param row 选择的行数据
- */
-function handleRowClick(row: DeptRecord) {
-  currentRows = [row]
-  console.log(currentRows)
 }
 
 /**
@@ -276,7 +266,6 @@ const handleSelectionChange = (rows: DeptRecords) => {
     :tb-header-btn="tableInfo.tbHeaderBtn"
     :handle-btn="tableInfo.handleBtn"
     @selection-change="handleSelectionChange"
-    @handle-row-click="handleRowClick"
   />
 
   <!-- 新增 / 修改 Dialog -->

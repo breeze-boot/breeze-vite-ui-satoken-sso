@@ -422,10 +422,10 @@ const handleDelete = async (rows: UserRecords) => {
   try {
     const userIds = rows.map((item: any) => item.id)
     await deleteUser(userIds)
-    useMessage().success(`${t('common.delete') + t('common.success')}`)
+    useMessage().success(`${t('common.delete')} ${t('common.success')}`)
     reloadList()
   } catch (err: any) {
-    useMessage().error(`${t('common.fail')}` + err.message)
+    useMessage().error(`${t('common.fail')} ${err.message}`)
   }
 }
 
@@ -442,7 +442,7 @@ const handleExport = async (currentPage: boolean) => {
     const response: any = await exportExcel(_queryParams)
     saveTypeFile(response, response.type, '用户数据')
   } catch (err: any) {
-    useMessage().error(`${t('common.fail')}` + err.message)
+    useMessage().error(`${t('common.fail')} ${err.message}`)
   }
 }
 
@@ -453,16 +453,6 @@ const handleExport = async (currentPage: boolean) => {
  */
 const handleUpdate = (row: any) => {
   AddOrEditHandle(row.id)
-}
-
-/**
- * 选中行，设置当前行currentRow
- *
- * @param row 选择的行数据
- */
-function handleRowClick(row: UserRecord) {
-  currentRows = [row]
-  console.log(currentRows)
 }
 
 /**
@@ -536,7 +526,6 @@ const handleSelectionChange = (rows: UserRecords) => {
     :tb-header-btn="tableInfo.tbHeaderBtn"
     :handle-btn="tableInfo.handleBtn"
     @selection-change="handleSelectionChange"
-    @handle-row-click="handleRowClick"
   />
 
   <!-- 新增 / 修改 Dialog -->

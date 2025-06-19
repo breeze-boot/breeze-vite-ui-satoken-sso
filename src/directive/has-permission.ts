@@ -20,8 +20,8 @@ export const isHasPermission = (app: any) => {
 }
 
 const filterOptions = async (el: any, options: any) => {
-  if (!options.value) return
-  const permissions: string[] = await userStore.getPermissions()
+  if (!options.value || options.value.length === 0) return
+  const permissions: string[] = await userStore.userPermissions
   let remove: boolean = true
   for (const item of options.value) {
     if (permissions.includes(item)) {
@@ -29,7 +29,7 @@ const filterOptions = async (el: any, options: any) => {
     }
   }
 
-  const userRoleCode: string[] = await userStore.getRoleCodes()
+  const userRoleCode: string[] = await userStore.userRoleCodes
   for (const item of options.value) {
     if (userRoleCode.includes(item)) {
       remove = false

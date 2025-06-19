@@ -64,9 +64,22 @@ export function doLoginByTicket(ticket: string, back: string) {
 /**
  * sso 用户信息
  */
-export function userInfo() {
+export function userInfoAPI() {
   return request({
     url: '/sso/userInfo',
     method: 'get',
+  })
+}
+
+/**
+ * dingTalk 授权
+ */
+export function dingTalkAuth(authCode: string) {
+  return request({
+    url: '/dingTalk/auth',
+    method: 'get',
+    params: {
+      authCode,
+    },
   })
 }

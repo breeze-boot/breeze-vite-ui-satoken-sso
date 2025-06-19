@@ -38,7 +38,7 @@ const initNoticeMsg = async () => {
     const response: any = await listUsersMsg(userStore.userInfo.username)
     noticeMsg.value = response.data
   } catch (err: any) {
-    useMessage().error(`${t('common.fail')}` + err.message)
+    useMessage().error(`${t('common.fail')} ${err.message}`)
   }
 }
 
@@ -161,14 +161,16 @@ const handleCloseDialog = async () => {
   font-size: 1.5em;
   font-weight: bold;
   margin: 30px 10px;
-  font-family: Inter, 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑',
-    Arial, sans-serif;
+  font-family:
+    Inter, 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial,
+    sans-serif;
 }
 
 .msg-content {
   margin: 30px 10px;
-  font-family: Inter, 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑',
-    Arial, sans-serif;
+  font-family:
+    Inter, 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', '微软雅黑', Arial,
+    sans-serif;
 }
 
 .msg-box::-webkit-scrollbar {

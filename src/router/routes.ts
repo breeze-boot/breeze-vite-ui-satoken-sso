@@ -84,7 +84,19 @@ export const constantRoutes = [
     component: () => import('@/views/login/redirect/index.vue'),
     meta: {
       title: '重定向',
-      icon: 'redirect',
+      icon: '',
+      hidden: true,
+      type: 1,
+      href: 0,
+    },
+  },
+  {
+    path: '/ding',
+    name: 'Ding',
+    component: () => import('@/views/login/ding/index.vue'),
+    meta: {
+      title: '',
+      icon: '',
       hidden: true,
       type: 1,
       href: 0,

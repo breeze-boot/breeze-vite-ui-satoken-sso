@@ -141,21 +141,11 @@ const handleDelete = async (rows: AuditLogRecords) => {
   try {
     const logIds = rows.map((item: any) => item.id)
     await deleteLog(logIds)
-    useMessage().success(`${t('common.delete') + t('common.success')}`)
+    useMessage().success(`${t('common.delete')} ${t('common.success')}`)
     reloadList()
   } catch (err: any) {
-    useMessage().error(`${t('common.fail')}` + err.message)
+    useMessage().error(`${t('common.fail')} ${err.message}`)
   }
-}
-
-/**
- * 选中行，设置当前行currentRow
- *
- * @param row 选择的行数据
- */
-function handleRowClick(row: AuditLogRecord) {
-  currentRows = [row]
-  console.log(currentRows)
 }
 
 /**
@@ -208,7 +198,6 @@ const handleSelectionChange = (rows: AuditLogRecords) => {
     :tb-header-btn="tableInfo.tbHeaderBtn"
     :handle-btn="tableInfo.handleBtn"
     @selection-change="handleSelectionChange"
-    @handle-row-click="handleRowClick"
   >
     <template #col-slot="{ row }"></template>
   </b-table>

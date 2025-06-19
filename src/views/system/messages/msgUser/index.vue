@@ -179,21 +179,11 @@ const handleDelete = async (rows: MsgUserRecords) => {
   try {
     const msgUserIds = rows.map((item: any) => item.id)
     await deleteMsgUser(msgUserIds)
-    useMessage().success(`${t('common.delete') + t('common.success')}`)
+    useMessage().success(`${t('common.delete')} ${t('common.success')}`)
     reloadList()
   } catch (err: any) {
-    useMessage().error(`${t('common.fail')}` + err.message)
+    useMessage().error(`${t('common.fail')} ${err.message}`)
   }
-}
-
-/**
- * 选中行，设置当前行currentRow
- *
- * @param row 选择的行数据
- */
-function handleRowClick(row: MsgUserRecord) {
-  currentRows = [row]
-  console.log(currentRows)
 }
 
 /**
@@ -244,6 +234,5 @@ const handleSelectionChange = (rows: MsgUserRecords) => {
     :tb-header-btn="tableInfo.tbHeaderBtn"
     :handle-btn="tableInfo.handleBtn"
     @selection-change="handleSelectionChange"
-    @handle-row-click="handleRowClick"
   />
 </template>
