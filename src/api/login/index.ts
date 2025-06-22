@@ -83,3 +83,17 @@ export function dingTalkAuth(authCode: string) {
     },
   })
 }
+
+/**
+ * 用户名密码 授权
+ */
+export function simpleLogin(username: string, password: string) {
+  return request({
+    url: '/auth/simpleLogin',
+    method: 'get',
+    params: {
+      username,
+      password,
+    },
+  })
+}

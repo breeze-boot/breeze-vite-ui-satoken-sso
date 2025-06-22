@@ -1,7 +1,3 @@
-<!--
- * @author: gaoweixuan
- * @since: 2023-11-12
--->
 <script setup lang="ts">
 import { computed, ref, onMounted } from 'vue'
 import useUserStore from '@/store/modules/user'
@@ -9,16 +5,16 @@ import useSettingStore from '@/store/modules/setting'
 import { storeToRefs } from 'pinia'
 import { useRouter } from 'vue-router'
 import Verify from '@/components/anj-plus/Verify.vue'
-import { THEME } from '@/utils/common.ts'
 import SvgButton from '@/components/SvgButton/index.vue'
 import { SelectData } from '@/types/types.ts'
 import { selectTenant } from '@/api/auth/tenant'
+import { useMessage } from '@/hooks/message'
 
 let $router = useRouter()
 let settingStore = useSettingStore()
-let { theme, settings } = storeToRefs(settingStore)
+let { settings } = storeToRefs(settingStore)
 let loading = ref(false)
-let userStore = useUserStore()
+const userStore = useUserStore()
 
 // 单点登录地址
 const loginUrl = '/sso-login?back=' + encodeURIComponent(location.href)
@@ -27,10 +23,7 @@ const loginUrl = '/sso-login?back=' + encodeURIComponent(location.href)
  * 初始化
  */
 onMounted(async () => {
-  changeDark()
-  changeThemeColor()
   await initSelectTenant()
-  await userStore.clearLoginInfo()
   // const res: any = await checkIsLogin()
   // if (res.data) {
   //   await $router.push(loginUrl)
@@ -67,25 +60,6 @@ const initSelectTenant = async () => {
 }
 
 /**
- * 切换日间/夜间模式
- */
-const changeDark = () => {
-  let html = document.documentElement
-  if (theme.value.themeModel !== THEME.DARK) {
-    html.classList.remove(THEME.DARK)
-    return
-  }
-  html.classList.add(THEME.DARK)
-}
-
-/**
- * 改变主题颜色
- */
-const changeThemeColor = () => {
-  document.documentElement.style.setProperty('--el-color-primary', theme.value.themeColor)
-}
-
-/**
  * 标题动态获取计算属性
  */
 const title = computed(() => {
@@ -93,7 +67,7 @@ const title = computed(() => {
 })
 
 const handleToSsoLogin = () => {
-  if (!tenantId.value || tenantId.value === '') {
+  if (!tenantId.value) {
     open.value = true
     return
   }
@@ -121,69 +95,65 @@ const tenantName = computed(() => {
 </script>
 
 <template>
-  <el-watermark
-    :font="theme.themeModel === THEME.DARK ? theme.lightFont : theme.darkFont"
-    :content="theme.watermarkContent"
-  >
-    <div class="login_container" @keyup.enter="handleCheck">
-      <div class="tenant">
-        <el-popover placement="bottom" trigger="hover">
-          <el-select
-            :teleported="false"
-            @change="() => userStore.storeTenantId(tenantId)"
-            v-model="tenantId"
-            style="width: 120px"
-          >
-            <el-option v-for="item in tenantOption" :key="item?.value" :label="item?.label" :value="item?.value" />
-          </el-select>
-          <template #reference>
-            <svg-button
-              ref="tenant"
-              :style="{ background: 'transparent !important', border: 'transparent !important' }"
-              :circle="true"
-              icon="tenant"
-              width="2rem"
-              height="2rem"
-            />
-          </template>
-        </el-popover>
-      </div>
-
-      <div class="login-form-card">
-        <h1>{{ title }}</h1>
-        <svg-button
-          @svg-btn-click="handleToSsoLogin"
-          :style="{ background: 'transparent !important' }"
-          :circle="true"
-          :loading="loading"
-          icon="sso"
-          width="10rem"
-          height="10rem"
-          type="primary"
-        />
-        <div class="tenant-name">{{ tenantName }}</div>
-      </div>
-      <el-tour content-style="width: 200px" v-model="open">
-        <el-tour-step :target="tenant?.$el" title="租户">请选择租户</el-tour-step>
-      </el-tour>
-      <Verify
-        mode="pop"
-        @success="() => {}"
-        :captchaType="captchaType"
-        :imgSize="{ width: '400px', height: '200px' }"
-        ref="verify"
-      ></Verify>
+  <!-- SSO登录场景容器 -->
+  <div class="sso-login-container" @keyup.enter="handleCheck">
+    <div class="sso-login">
+      <el-popover placement="bottom" trigger="hover">
+        <el-select
+          :teleported="false"
+          @change="() => userStore.storeTenantId(tenantId)"
+          v-model="tenantId"
+          style="width: 120px"
+        >
+          <el-option v-for="item in tenantOption" :key="item?.value" :label="item?.label" :value="item?.value" />
+        </el-select>
+        <template #reference>
+          <svg-button
+            ref="tenant"
+            :style="{ background: 'transparent !important', border: 'transparent !important' }"
+            :circle="true"
+            icon="tenant"
+            width="2rem"
+            height="2rem"
+          />
+        </template>
+      </el-popover>
     </div>
-  </el-watermark>
+
+    <div class="login-form-card">
+      <h1>{{ title }}</h1>
+      <svg-button
+        @svg-btn-click="handleToSsoLogin"
+        :style="{ background: 'transparent !important' }"
+        :circle="true"
+        :loading="loading"
+        icon="login"
+        width="10rem"
+        height="10rem"
+        type="primary"
+      />
+      <div class="tenant-name">{{ tenantName }}</div>
+    </div>
+    <el-tour content-style="width: 200px" v-model="open">
+      <el-tour-step :target="tenant?.$el" title="租户">请选择租户</el-tour-step>
+    </el-tour>
+    <Verify
+      mode="pop"
+      @success="() => {}"
+      :captchaType="captchaType"
+      :imgSize="{ width: '400px', height: '200px' }"
+      ref="verify"
+    />
+  </div>
 </template>
 
 <style lang="scss" scoped>
-.login_container {
+.sso-login-container {
   width: 100vw;
   height: 100vh;
-  background-image: radial-gradient(circle at 48.7% 44.3%, rgb(254, 254, 254) 10.5%, rgb(181, 239, 249) 50%);
+  background: radial-gradient(circle at 48.7% 44.3%, #fefefe 10.5%, #b5eff9 50%);
 
-  .tenant {
+  .sso-login {
     position: absolute;
     right: 10px;
     top: 10px;
@@ -215,6 +185,7 @@ const tenantName = computed(() => {
       background-clip: text;
       -webkit-text-fill-color: transparent;
     }
+
     .tenant-name {
       position: absolute;
       bottom: 0;
@@ -228,7 +199,7 @@ const tenantName = computed(() => {
 }
 
 .el-card {
-  box-shadow: rgb(0 0 0 / 24%) 0 0 3px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0 0 3px;
 }
 
 :deep(.el-input-group__append, .el-input-group__prepend) {

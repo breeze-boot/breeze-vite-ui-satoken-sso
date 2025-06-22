@@ -24,4 +24,10 @@ export default {
   watermarkContent: ['BREEZE', 'VUE3'],
   defaultLanguage: LANGUAGE.ZH_CN,
   size: 'small',
+  // 钉钉登录配置
+  dingLogin: {
+    redirectUri: 'https://22i24277w6.51vip.biz',
+    clientId: 'dingmdfbjobhznnpqsy4',
+    state: 'state',
+  },
 }

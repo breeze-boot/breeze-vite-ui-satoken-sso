@@ -8,7 +8,7 @@ import useMenuStore from '@/store/modules/menu'
 
 nprogress.configure({ showSpinner: false })
 
-const whiteRoute: string[] = ['/redirect', '/ding-login', '/ding', '/sso-login', '/sso']
+const whiteRoute: string[] = ['/login', '/sso-login', '/ding-scan', '/simple-login', '/ding-auth', '/sso']
 const userStore = useUserStore(pinia)
 const menuStore = useMenuStore(pinia)
 
@@ -21,24 +21,22 @@ router.beforeEach(async (to, from, next) => {
   nprogress.start()
 
   const token = userStore.accessToken as string
-
   // 用户未登录
   if (!token) {
     if (whiteRoute.includes(to.path)) {
       next() // 白名单路由直接放行
       return
     } else {
-      next({ path: '/sso', query: { redirect: to.path, ...to.query } }) // 重定向到SSO
+      next({ path: '/login', query: { redirect: to.path, ...to.query } }) // 重定向到登录页
       return
     }
   }
 
   // 用户已登录
   const initMenu = menuStore.initMenu as boolean
-
   if (initMenu) {
     // 菜单已初始化
-    if (to.path === '/sso') {
+    if (to.path === '/login' || to.path === '/sso-login' || to.path === '/sso') {
       next({ path: '/' }) // 重定向到主页
       return
     }
@@ -59,7 +57,7 @@ router.beforeEach(async (to, from, next) => {
     } catch (error) {
       await userStore.logout() // 登出操作
       // 重定向到SSO
-      next({ path: '/sso', query: { redirect: to.path } })
+      next({ path: '/login', query: { redirect: to.path } })
     }
   }
 })

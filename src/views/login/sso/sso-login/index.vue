@@ -54,7 +54,7 @@ onMounted(async () => {
 onMounted(async () => {
   const res: any = await checkIsLogin()
   if (res.data) {
-    await columnStore.getRolesMenuColumns()
+    await columnStore.fetchRolesMenuColumns()
     await userStore.storeUserInfo()
   }
 })
@@ -77,7 +77,7 @@ const handleDoLoginByTicket = async (ticket: string, back: string) => {
   try {
     const response: any = await doLoginByTicket(ticket, back)
     await userStore.storeLoginInfo(response.data)
-    await columnStore.getRolesMenuColumns()
+    await columnStore.fetchRolesMenuColumns()
     await userStore.storeUserInfo()
     location.href = decodeURIComponent(back)
   } catch (err: any) {
@@ -85,7 +85,3 @@ const handleDoLoginByTicket = async (ticket: string, back: string) => {
   }
 }
 </script>
-
-<template>{{}}</template>
-
-<style lang="scss" scoped></style>

@@ -4,9 +4,63 @@
  */
 export const loginRoutes = [
   {
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/views/login/index.vue'),
+    meta: {
+      title: '登录',
+      hidden: true,
+    },
+  },
+  {
+    path: '/simple-login',
+    name: 'SimpleLogin',
+    component: () => import('@/views/login/simple-login/index.vue'),
+    meta: {
+      title: '登录',
+      hidden: true,
+    },
+  },
+  {
+    path: '/ding-scan',
+    name: 'DingScan',
+    component: () => import('@/views/login/ding-scan/index.vue'),
+    meta: {
+      title: '',
+      icon: '',
+      hidden: true,
+      type: 1,
+      href: 0,
+    },
+  },
+  {
+    path: '/sso',
+    name: 'Sso',
+    component: () => import('@/views/login/sso/index.vue'),
+    meta: {
+      title: '',
+      icon: '',
+      hidden: true,
+      type: 1,
+      href: 0,
+    },
+  },
+  {
+    path: '/ding-auth',
+    name: 'DingAuth',
+    component: () => import('@/views/login/ding-auth/index.vue'),
+    meta: {
+      title: '',
+      icon: '',
+      hidden: true,
+      type: 1,
+      href: 0,
+    },
+  },
+  {
     path: '/sso-login',
     name: 'SsoLogin',
-    component: () => import('@/views/login/sso-login/index.vue'),
+    component: () => import('@/views/login/sso/sso-login/index.vue'),
     meta: {
       title: 'sso登录',
       icon: 'sso-login',
@@ -78,39 +132,6 @@ export const constantChildRoutes = [
 ]
 
 export const constantRoutes = [
-  {
-    path: '/redirect',
-    name: 'Redirect',
-    component: () => import('@/views/login/redirect/index.vue'),
-    meta: {
-      title: '重定向',
-      icon: '',
-      hidden: true,
-      type: 1,
-      href: 0,
-    },
-  },
-  {
-    path: '/ding',
-    name: 'Ding',
-    component: () => import('@/views/login/ding/index.vue'),
-    meta: {
-      title: '',
-      icon: '',
-      hidden: true,
-      type: 1,
-      href: 0,
-    },
-  },
-  {
-    path: '/sso',
-    name: 'Sso',
-    component: () => import('@/views/login/sso/index.vue'),
-    meta: {
-      title: 'sso',
-      hidden: true,
-    },
-  },
   {
     path: '/',
     name: 'Layout',
