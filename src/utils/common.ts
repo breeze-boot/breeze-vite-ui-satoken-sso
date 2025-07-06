@@ -4,7 +4,6 @@
  */
 import * as CryptoJS from 'crypto-js'
 import { SelectData } from '@/types/types.ts'
-import setting from '@/setting.ts'
 
 export const ROOT: SelectData = {
   value: '1111111111111111111',

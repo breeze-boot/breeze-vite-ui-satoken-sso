@@ -155,24 +155,23 @@ const tenantName = computed(() => {
 
   .sso-login {
     position: absolute;
-    right: 10px;
     top: 10px;
+    right: 10px;
     z-index: 100;
   }
 
   .login-form-card {
-    border: none;
     position: absolute;
     top: 20vh;
     left: 50%;
+    display: flex;
+    flex-direction: column;
+    place-items: center center;
+    justify-content: center;
     width: 28rem;
     height: 25rem;
+    border: none;
     transform: translateX(-50%);
-    display: flex;
-    justify-items: center;
-    align-items: center;
-    flex-direction: column;
-    justify-content: center;
 
     h1 {
       margin-top: -10px;
@@ -189,17 +188,17 @@ const tenantName = computed(() => {
     .tenant-name {
       position: absolute;
       bottom: 0;
-      text-align: center;
+      z-index: 999;
       width: 100%;
       height: 50px;
       padding: 10px;
-      z-index: 999;
+      text-align: center;
     }
   }
 }
 
 .el-card {
-  box-shadow: rgba(0, 0, 0, 0.24) 0 0 3px;
+  box-shadow: rgb(0 0 0 / 24%) 0 0 3px;
 }
 
 :deep(.el-input-group__append, .el-input-group__prepend) {

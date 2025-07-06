@@ -219,15 +219,7 @@ const handleSwitchLogin = (type: string) => {
       <!-- 中心图标 - 支持悬停效果 -->
       <div class="login-form-card" v-if="!curLoginUI">
         <div class="center-icon-container" @mouseenter="handleMouseEnter" @mouseleave="handleMouseLeave">
-          <svg-button
-            :circle="true"
-            :loading="loading"
-            icon="login"
-            width="10rem"
-            height="10rem"
-            type="primary"
-            class="main-icon"
-          />
+          <svg-button :circle="true" :loading="loading" icon="login" width="10rem" height="10rem" type="primary" />
 
           <!-- 动态登录方式图标 -->
           <div
@@ -269,34 +261,25 @@ const handleSwitchLogin = (type: string) => {
   background: radial-gradient(circle at 48.7% 44.3%, #fefefe 10.5%, #b5eff9 50%);
 
   .login-form-card {
-    border: none;
     position: absolute;
     top: 20vh;
     left: 50%;
+    display: flex;
+    flex-direction: column;
+    place-items: center center;
+    justify-content: center;
     width: 28rem;
     height: 25rem;
+    border: none;
     transform: translateX(-50%);
-    display: flex;
-    justify-items: center;
-    align-items: center;
-    flex-direction: column;
-    justify-content: center;
 
     .center-icon-container {
       position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       width: 300px;
       height: 300px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-
-      .main-icon {
-        transition: transform 0.3s ease;
-
-        &:hover {
-          transform: scale(1.05);
-        }
-      }
     }
   }
 }

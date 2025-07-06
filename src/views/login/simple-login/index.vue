@@ -29,12 +29,18 @@
           </el-form-item>
 
           <el-form-item label="" prop="tenantId">
-            <el-select v-model="form.tenantId" placeholder="请选择租户" style="width: 100%" filterable>
-              <el-option v-for="item in tenantOptions" :key="item.value" :label="item.label" :value="item.value" />
+            <el-select
+              @change="() => userStore.storeTenantId(form.tenantId)"
+              v-model="form.tenantId"
+              placeholder="请选择租户"
+              style="width: 100%"
+              filterable
+            >
+              <el-option v-for="item in tenantOption" :key="item.value" :label="item.label" :value="item.value" />
             </el-select>
           </el-form-item>
 
-          <el-form-item style="text-align: center; margin-top: 30px">
+          <el-form-item style="margin-top: 30px; text-align: center">
             <el-button
               @click="handleLogin"
               :loading="loading"
@@ -60,22 +66,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { SelectData } from '@/types/types.ts'
+import { SALES, SelectData } from '@/types/types.ts'
+import { simpleLogin } from '@/api/login'
+import useUserStore from '@/store/modules/user.ts'
+import { selectTenant } from '@/api/auth/tenant'
+import { useMessage } from '@/hooks/message'
+import { encrypt } from '@/utils/common.ts'
 
 const $router = useRouter()
 
 // 表单状态
 const form = reactive({
-  username: '',
-  password: '',
+  username: 'admin',
+  password: '123456',
   tenantId: '',
 })
 
 // 组件状态
-const tenantOptions = ref<SelectData[]>([])
+const tenantOption = ref<SelectData[]>([])
 const loading = ref(false)
 const rules = ref({
   tenantId: [{ required: true, message: '请选择租户', trigger: 'change' }],
@@ -86,8 +97,25 @@ const loginFormRef = ref<any>()
 
 // 获取当前租户名称
 const tenantName = computed(() => {
-  const selected = tenantOptions.value.find((item) => item.value === form.tenantId)
+  const selected = tenantOption.value.find((item) => item.value === form.tenantId)
   return selected ? selected.label : '未选择'
+})
+let userStore = useUserStore()
+
+/**
+ * 初始化租户下拉框
+ */
+const initSelectTenant = async () => {
+  try {
+    const response: any = await selectTenant()
+    tenantOption.value = response.data
+  } catch (err: any) {
+    useMessage().error(err.message)
+  }
+}
+
+onMounted(() => {
+  initSelectTenant()
 })
 
 // 处理登录
@@ -99,8 +127,11 @@ const handleLogin = async () => {
   loading.value = true
   try {
     // 模拟登录接口
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-
+    const response: any = await simpleLogin(form.username, encrypt(form.password!.trim(), SALES))
+    debugger
+    // 存储用户信息
+    await userStore.storeLoginInfo(response.data.access_token)
+    await userStore.storeUserInfo()
     ElMessage.success('登录成功')
     await $router.push({ path: '/' })
   } catch (error: any) {
@@ -120,29 +151,29 @@ $secondary-color: #67c23a; /* 辅助色 - 成功绿色 */
 $text-primary: #303133; /* 主文本色 */
 $text-secondary: #606266; /* 次文本色 */
 $border-color: #dcdfe6; /* 边框色 */
-$bg-primary: #ffffff; /* 主背景色 */
+$bg-primary: #fff; /* 主背景色 */
 $bg-secondary: #f5f7fa; /* 次背景色 */
 $input-focus: #409eff; /* 输入框聚焦色 */
-$shadow-light: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-$shadow-medium: 0 4px 24px 0 rgba(0, 0, 0, 0.12);
+$shadow-light: 0 2px 12px 0 rgb(0 0 0 / 10%);
+$shadow-medium: 0 4px 24px 0 rgb(0 0 0 / 12%);
 $transition: all 0.3s ease;
 
 .login-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100vw;
   height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   padding: 20px;
-  position: relative;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 
   /* 背景装饰元素 - 现代几何图形 */
   &::before,
   &::after {
-    content: '';
     position: absolute;
     z-index: 0;
+    content: '';
     opacity: 0.08;
   }
 
@@ -151,71 +182,71 @@ $transition: all 0.3s ease;
     left: 5%;
     width: 300px;
     height: 300px;
-    border-radius: 50%;
     background: $primary-color;
+    border-radius: 50%;
   }
 
   &::after {
-    bottom: 15%;
     right: 8%;
+    bottom: 15%;
     width: 200px;
     height: 200px;
-    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
     background: $secondary-color;
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
   }
 
   .login-form-wrapper {
-    width: 100%;
-    max-width: 420px;
     position: relative;
     z-index: 1;
+    width: 100%;
+    max-width: 420px;
 
     .login-form-card {
+      overflow: hidden;
       background: $bg-primary;
       border-radius: 24px;
       box-shadow: $shadow-medium;
-      overflow: hidden;
       transition: $transition;
 
       &:hover {
+        box-shadow: 0 10px 30px 0 rgb(0 0 0 / 15%);
         transform: translateY(-5px);
-        box-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.15);
       }
 
       .login-header {
+        position: relative;
         padding: 45px 40px 35px;
+        overflow: hidden;
+        color: white;
         text-align: center;
         background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
-        color: white;
         border-radius: 0 0 30px 30px;
-        position: relative;
-        overflow: hidden;
 
         &::before {
-          content: '';
           position: absolute;
-          bottom: -50px;
           right: -50px;
+          bottom: -50px;
           width: 120px;
           height: 120px;
-          background: rgba(255, 255, 255, 0.1);
+          content: '';
+          background: rgb(255 255 255 / 10%);
           border-radius: 50%;
         }
 
         h1 {
-          font-size: 32px;
-          font-weight: 700;
-          margin-bottom: 12px;
           position: relative;
           z-index: 1;
+          margin-bottom: 12px;
+          font-size: 32px;
+          font-weight: 700;
         }
 
         p {
-          font-size: 16px;
-          opacity: 0.9;
-          margin: 0;
           position: relative;
           z-index: 1;
+          margin: 0;
+          font-size: 16px;
+          opacity: 0.9;
         }
       }
 
@@ -233,34 +264,34 @@ $transition: all 0.3s ease;
             &:focus-within {
               .el-input__inner {
                 border-color: $input-focus;
-                box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.2);
+                box-shadow: 0 0 0 3px rgb(64 158 255 / 20%);
               }
             }
 
             .el-input__inner {
               height: 50px;
-              font-size: 16px;
-              border-radius: 12px;
-              border-color: $border-color;
-              background-color: $bg-secondary;
-              transition: $transition;
               padding-left: 45px;
+              font-size: 16px;
+              background-color: $bg-secondary;
+              border-color: $border-color;
+              border-radius: 12px;
+              transition: $transition;
             }
 
             .el-input__prefix {
+              width: 40px;
+              font-size: 18px;
               line-height: 50px;
               color: $text-secondary;
-              width: 40px;
               text-align: center;
-              font-size: 18px;
             }
 
             .el-input__suffix {
+              width: 40px;
+              font-size: 18px;
               line-height: 50px;
               color: $text-secondary;
-              width: 40px;
               text-align: center;
-              font-size: 18px;
               cursor: pointer;
 
               &:hover {
@@ -272,12 +303,12 @@ $transition: all 0.3s ease;
       }
 
       .login-footer {
-        padding: 25px 40px 30px;
-        background-color: $bg-secondary;
-        border-top: 1px solid $border-color;
         display: flex;
         flex-direction: column;
         gap: 10px;
+        padding: 25px 40px 30px;
+        background-color: $bg-secondary;
+        border-top: 1px solid $border-color;
         border-radius: 0 0 24px 24px;
 
         .tenant-info {
@@ -287,16 +318,16 @@ $transition: all 0.3s ease;
           color: $text-primary;
 
           .tenant-name {
-            color: $primary-color;
             margin-left: 8px;
             font-weight: 500;
+            color: $primary-color;
           }
         }
 
         .copyright {
-          text-align: center;
           font-size: 13px;
           color: $text-secondary;
+          text-align: center;
           opacity: 0.8;
         }
       }
@@ -305,7 +336,7 @@ $transition: all 0.3s ease;
 }
 
 // 响应式设计
-@media (max-width: 450px) {
+@media (width <= 450px) {
   .login-container {
     padding: 15px;
   }
@@ -335,6 +366,7 @@ $transition: all 0.3s ease;
   100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.02);
   }

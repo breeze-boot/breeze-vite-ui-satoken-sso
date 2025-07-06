@@ -206,6 +206,8 @@ export interface DictItem {
 export interface Settings {
   title: string
   showAvatar: boolean
+  primaryColor: string
+  secondaryColor: string
   isCollapse: boolean
   logoHidden: boolean
   logoUrl: any

@@ -43,6 +43,10 @@ const dingSsoLogin = async (val: SelectData) => {
   console.log('获取 state 状态：', state)
   if (authCode.value) {
     const response: any = await dingTalkAuth(authCode.value)
+    if (response.data.code !== '0000') {
+      useMessage().error('登录失败，请稍后再试')
+      return
+    }
     await userStore.storeLoginInfo(response.data.access_token)
     await userStore.storeUserInfo()
     window.location.replace(`${window.location.protocol}//${window.location.host}`)
@@ -110,27 +114,27 @@ const handleSwitchLoginType = () => {
 <style lang="scss" scoped>
 // 钉钉登录容器
 .ding-login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100vw;
   height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: radial-gradient(circle at 48.7% 44.3%, #fefefe 10.5%, #b5eff9 50%);
   padding: 20px;
+  background: radial-gradient(circle at 48.7% 44.3%, #fefefe 10.5%, #b5eff9 50%);
 
   // 卡片容器
   .ding-card {
     width: 100%;
     max-width: 380px;
+    overflow: hidden;
     background: #fff;
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
+    box-shadow: 0 10px 25px rgb(0 0 0 / 8%);
     transition: all 0.3s ease;
 
     // 鼠标悬停效果
     &:hover {
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+      box-shadow: 0 15px 30px rgb(0 0 0 / 12%);
     }
 
     // 头部区域
@@ -138,10 +142,10 @@ const handleSwitchLoginType = () => {
       padding: 24px 24px 16px;
 
       .ding-title {
+        margin-bottom: 8px;
         font-size: 18px;
         font-weight: 600;
         color: #333;
-        margin-bottom: 8px;
       }
 
       .ding-subtitle {
@@ -181,8 +185,8 @@ const handleSwitchLoginType = () => {
       align-items: center;
       justify-content: space-between;
       padding: 16px 24px;
-      border-bottom: 1px solid #f0f0f0;
       cursor: pointer;
+      border-bottom: 1px solid #f0f0f0;
       transition: all 0.2s ease;
 
       // 鼠标悬停效果
@@ -198,37 +202,37 @@ const handleSwitchLoginType = () => {
 
       // 组织图标
       .ding-org-icon {
-        width: 32px;
-        height: 32px;
-        background-color: #e6f4ff;
-        border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
+        width: 32px;
+        height: 32px;
         margin-right: 12px;
+        background-color: #e6f4ff;
+        border-radius: 50%;
 
         i {
-          color: #409eff;
           font-size: 16px;
+          color: #409eff;
         }
       }
 
       // 组织信息
       .ding-org-info {
         .ding-org-name {
+          margin-bottom: 2px;
           font-size: 14px;
           font-weight: 500;
           color: #333;
-          margin-bottom: 2px;
         }
 
         .last-login-tag {
+          display: inline-block;
+          padding: 1px 4px;
           font-size: 11px;
           color: #606266;
           background-color: #f0f2f5;
-          padding: 1px 4px;
           border-radius: 3px;
-          display: inline-block;
         }
       }
 

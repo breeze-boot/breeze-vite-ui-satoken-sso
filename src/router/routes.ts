@@ -85,7 +85,7 @@ export const constantChildRoutes = [
     },
   },
   {
-    path: 'tabWrapper/:pageId/:type/:path',
+    path: 'tabWrapper/:pageId/:type/:path/:_t',
     component: () => import('@/components/TabWrapper/index.vue'),
     name: 'TabWrapper',
     props: true,
@@ -101,6 +101,30 @@ export const constantChildRoutes = [
     path: '/screen',
     name: 'Screen',
     component: () => import('@/views/screen/index.vue'),
+    meta: {
+      title: 'Screen',
+      icon: 'screen',
+      hidden: false,
+      type: 1,
+      href: 0,
+    },
+  },
+  {
+    path: '/screen2',
+    name: 'Screen2',
+    component: () => import('@/views/screen/index_v2.vue'),
+    meta: {
+      title: 'Screen',
+      icon: 'screen',
+      hidden: false,
+      type: 1,
+      href: 0,
+    },
+  },
+  {
+    path: '/screen3',
+    name: 'Screen3',
+    component: () => import('@/views/screen/index_v3.vue'),
     meta: {
       title: 'Screen',
       icon: 'screen',
